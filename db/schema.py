@@ -44,6 +44,7 @@ def create_tables(conn):
             PrescrID TEXT,
             Content TEXT,
             DocID INTEGER,
+            PrescrDate TEXT,
             FOREIGN KEY (PatID) REFERENCES Patients(PatID),
             FOREIGN KEY (DocID) REFERENCES Therapist(DocID)
         );

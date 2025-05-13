@@ -6,13 +6,13 @@ class Prescription:
                  patient_id: str, 
                  doctor_id: str, 
                  treatm_type: str, 
-                 precr_date: str,
+                 prescr_date: str,
                  content: str):
         self.prescription_id = prescription_id
         self.patient_id = patient_id
         self.doctor_id = doctor_id
         self.treatm_type = treatm_type
-        self.precr_date = precr_date
+        self.precr_date = prescr_date
         self.content = content
 
 
