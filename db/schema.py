@@ -6,8 +6,9 @@ from db.connection import get_connection
 
 
 
-def create_tables(conn):
-    conn = get_connection()
+def create_tables(conn=None):
+    if conn is None:
+        conn = get_connection()
     cursor = conn.cursor()
 
     # Patients table

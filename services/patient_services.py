@@ -1,7 +1,8 @@
 from db.connection import get_connection
 
-def get_prescriptions(pat_id):
-    conn = get_connection()
+def get_prescriptions(pat_id, conn=None):
+    if conn is None:
+        conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""

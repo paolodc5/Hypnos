@@ -3,8 +3,9 @@ import sqlite3
 from db.connection import get_connection
 from datetime import datetime
 
-def write_prescription(pat_id, doc_id, treatm_type, content):
-    conn = get_connection()
+def write_prescription(pat_id, doc_id, treatm_type, content, conn=None):
+    if conn is None:
+        conn = get_connection()
     cursor = conn.cursor()
 
     prescr_id = f"{pat_id}_{doc_id}_{datetime.now().isoformat()}"
@@ -20,8 +21,9 @@ def write_prescription(pat_id, doc_id, treatm_type, content):
     return prescr_id
 
 
-def edit_prescription_db(prescr_id, new_content):
-    conn = get_connection()
+def edit_prescription_db(prescr_id, new_content, conn=None):
+    if conn is None:
+        conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -34,8 +36,9 @@ def edit_prescription_db(prescr_id, new_content):
     conn.close()
 
 
-def view_patient_sleep_records(pat_id):
-    conn = get_connection()
+def view_patient_sleep_records(pat_id, conn=None):
+    if conn is None:
+        conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -49,8 +52,9 @@ def view_patient_sleep_records(pat_id):
     return records
 
 
-def view_patient_questionnaires(pat_id):
-    conn = get_connection()
+def view_patient_questionnaires(pat_id, conn=None):
+    if conn is None:
+        conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -64,8 +68,9 @@ def view_patient_questionnaires(pat_id):
     return questionnaires
 
 
-def write_note(pat_id, doc_id, content):
-    conn = get_connection()
+def write_note(pat_id, doc_id, content, conn=None):
+    if conn is None:
+        conn = get_connection()
     cursor = conn.cursor()
 
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -79,8 +84,9 @@ def write_note(pat_id, doc_id, content):
     conn.close()
 
 
-def edit_note_db(note_id, new_content):
-    conn = get_connection()
+def edit_note_db(note_id, new_content, conn=None):
+    if conn is None:
+        conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
