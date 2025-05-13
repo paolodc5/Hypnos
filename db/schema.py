@@ -144,7 +144,8 @@ def create_tables(conn):
     conn.commit()
 
 if __name__ == "__main__":
-    conn = create_connection("sleep_monitoring.db")
+    conn = get_connection()
+    print("Connected to the database.")
     if conn is not None:
         create_tables(conn)
         print("Tables created successfully.")
