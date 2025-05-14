@@ -43,11 +43,40 @@ def insert_fake_patients():
         except sqlite3.IntegrityError:
             pass  # Skip if already exists
 
+
     conn.commit()
     conn.close()
+
+
+def insert_fake_prescriptions():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    prescriptions = [
+        (1, 101, "Medication", "001","Has to be taken at night", 1, "12-08-2025"),
+        (2, 101, "Medication", "002","Dangerous pill for sleeping", 1, "12-08-2025"),
+        (3, 102, "Medication", "001","Has to be taken at night", 2, "12-08-2025"),
+    ]
+
+    for pres in prescriptions:
+        try:
+            cursor.execute("""
+                INSERT INTO Prescriptions (ID, PatID, Type, PrescrID, Content, DocID, PrescrDate)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, pres)
+        except sqlite3.IntegrityError:
+            pass  # Skip if already exists
+
+    conn.commit()
+    conn.close()
+
 
 if __name__ == "__main__":
     print("Seeding database with test doctors and patients...")
     insert_fake_doctors()
     insert_fake_patients()
+    insert_fake_prescriptions()
     print("Done!")
+
+
+
