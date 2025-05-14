@@ -32,6 +32,7 @@ def create_tables(conn=None):
             DocID INTEGER PRIMARY KEY,
             Name TEXT NOT NULL,
             Email TEXT UNIQUE NOT NULL,
+            Password TEXT NOT NULL,
             Specialty TEXT
         );
     """)
