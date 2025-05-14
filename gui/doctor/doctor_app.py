@@ -10,29 +10,48 @@ class DoctorApp(ctk.CTk):
         self.title(f"Hypnos - Doctor Dashboard")
         self.geometry("1000x600")
         self.doctor = doctor
-        self.doctor_id = doctor.doctor_id
-  
+        self.doctor.load_patients()
+        
+        self.setup_gui()
+        self.load_home()
 
-        self.sidebar = ctk.CTkFrame(self, width=200)
+
+    def setup_gui(self):
+
+        # Set up the sidebar
+        self.sidebar = ctk.CTkFrame(self, width=200, height=500, fg_color="#204080")
         self.sidebar.pack(side="left", fill="y")
+        self.title("Workspace")
+        self.geometry("800x500")
 
+
+        # Set up the main window
         self.content_frame = ctk.CTkFrame(self, width=800)
         self.content_frame.pack(side="right", fill="both", expand=True)
+        
+        # Set appearance and theme
+        ctk.set_appearance_mode("light")
+        ctk.set_default_color_theme("blue")  # Predefined blue theme
 
-        ctk.CTkLabel(self.sidebar, text="Doctor Dashboard", font=("Arial", 16, "bold")).pack(pady=10)
-        ctk.CTkButton(self.sidebar, text="Prescriptions").pack(pady=10)
-        ctk.CTkButton(self.sidebar, text="Notes").pack(pady=10)
-        ctk.CTkButton(self.sidebar, text="Sleep Records").pack(pady=10)
+        # Sidebar title
+        ctk.CTkLabel(self.sidebar, text="E-Health System", font=("Arial", 16, "bold"), text_color="white", width=200, height=30, anchor="center"
+                     ).place(x=0, y=30)
 
-        self.load_home()
+        # Navigation buttons
+        self.home_button = ctk.CTkButton(self.sidebar, text="Home", command=self.load_home, width=160, fg_color="#3366cc", hover_color="#66d9cc"
+                                        ).place(x=20, y=80)
+        self.prescriptions_button = ctk.CTkButton(self.sidebar, text="Patients", width=160, fg_color="#3366cc", hover_color="#66d9cc"
+                                        ).place(x=20, y=130)
 
     def clear_content(self):
         for widget in self.content_frame.winfo_children():
             widget.destroy()
 
+
     def load_home(self):
         self.clear_content()
-        ctk.CTkLabel(self.content_frame, text=f"Welcome Doctor {self.doctor.name}", font=("Arial", 20)).pack(pady=20)
+        ctk.CTkLabel(self.content_frame, text=f"Welcome back, Dr. {self.doctor.surname}", font=("Arial", 18), text_color="#204080", width=600, height=50
+                     ).place(x=0, y=225)
 
     # def load_prescriptions(self):
     #     self.clear_content()

@@ -14,8 +14,9 @@ def create_tables(conn=None):
     # Patients table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Patients (
-            PatID INTEGER PRIMARY KEY,
+            PatID INTEGER PRIMARY KEY AUTOINCREMENT,
             Name TEXT NOT NULL,
+            Surname TEXT NOT NULL,
             DateOfBirth TEXT,
             Gender TEXT,
             FiscalCode TEXT UNIQUE,
@@ -29,8 +30,9 @@ def create_tables(conn=None):
     # Therapist table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Therapist (
-            DocID INTEGER PRIMARY KEY,
+            DocID INTEGER PRIMARY KEY AUTOINCREMENT,
             Name TEXT NOT NULL,
+            Surname TEXT NOT NULL,
             Email TEXT UNIQUE NOT NULL,
             Password TEXT NOT NULL,
             Specialty TEXT

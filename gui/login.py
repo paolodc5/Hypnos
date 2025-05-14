@@ -17,11 +17,14 @@ class LoginWindow(ctk.CTk):
         self.password_entry = ctk.CTkEntry(self, placeholder_text="Enter Password", show="*")
         self.password_entry.pack(pady=10)
 
-        self.login_button = ctk.CTkButton(self, text="Login", command=self.login_callback)
-        self.login_button.pack(pady=20)
 
         self.message_label = ctk.CTkLabel(self, text="", text_color="red")
         self.message_label.pack(pady=10)
+    
+        self.login_button = ctk.CTkButton(self, text="Login", command=self.login_callback)
+        self.login_button.pack(pady=20)
+
+ 
     
     def login_callback(self):
         name = self.doc_id_entry.get().strip()

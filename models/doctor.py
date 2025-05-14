@@ -1,5 +1,7 @@
 from typing import List, TYPE_CHECKING
 from datetime import datetime
+from services.patient_services import get_patients_by_doctor
+
 
 if TYPE_CHECKING:
     from models.patient import Patient
@@ -11,10 +13,12 @@ if TYPE_CHECKING:
     from models.appointment_slot import AppointmentSlot
 
 
+
 class Doctor:
-    def __init__(self, doctor_id: int, name: str, specialty: str, email: str, password: str):
+    def __init__(self, doctor_id: int, name: str, surname:str, specialty: str, email: str, password: str):
         self.doctor_id = doctor_id
         self.name = name
+        self.surname = surname
         self.specialty = specialty
         self.email = email
         self.password = password
@@ -67,6 +71,9 @@ class Doctor:
         
         appointment.status = "confirmed"
         appointment.slot.is_booked = True
+    
+    def load_patients(self):
+        self.patients = get_patients_by_doctor(self.doctor_id)
 
     def __str__(self):
         return f"Doctor({self.doctor_id}, {self.name}, {self.specialty})"

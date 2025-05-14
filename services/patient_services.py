@@ -1,4 +1,7 @@
 from db.connection import get_connection
+# from models.patient import Patient
+import sqlite3
+from typing import List
 
 def get_prescriptions(pat_id, conn=None):
     if conn is None:
@@ -44,3 +47,33 @@ def get_sleep_data(pat_id):
 
     conn.close()
     return records
+
+
+def get_patients_by_doctor(doc_id: int):
+    from models.patient import Patient
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT * FROM Patients WHERE DocID = ? ORDER BY Surname, Name
+    """, (doc_id,))
+    rows = cursor.fetchall()
+    conn.close()
+
+    patients = []
+    for row in rows:
+        patient = Patient(
+            patient_id=row["PatID"],
+            name=row["Name"],
+            surname=row["Surname"],
+            birth_date=row["DateOfBirth"],
+            gender=row["Gender"],
+            fiscal_code=row["FiscalCode"],
+            age=row["Age"],
+            phone_number=row["PhoneNumber"],
+            doctor_id=row["DocID"],
+        )
+        patients.append(patient)
+
+    return patients
