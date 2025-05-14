@@ -15,7 +15,6 @@ class Patient:
                  patient_id: str, 
                  name: str,
                  surname: str, 
-                 email: None, 
                  birth_date: str, 
                  age: int,
                  gender: str,

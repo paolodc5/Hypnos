@@ -11,7 +11,7 @@ class DoctorApp(ctk.CTk):
         self.geometry("1000x600")
         self.doctor = doctor
         self.doctor.load_patients()
-        
+
         self.setup_gui()
         self.load_home()
 
@@ -40,7 +40,7 @@ class DoctorApp(ctk.CTk):
         # Navigation buttons
         self.home_button = ctk.CTkButton(self.sidebar, text="Home", command=self.load_home, width=160, fg_color="#3366cc", hover_color="#66d9cc"
                                         ).place(x=20, y=80)
-        self.prescriptions_button = ctk.CTkButton(self.sidebar, text="Patients", width=160, fg_color="#3366cc", hover_color="#66d9cc"
+        self.patient_button = ctk.CTkButton(self.sidebar, text="Patients", width=160, fg_color="#3366cc", hover_color="#66d9cc"
                                         ).place(x=20, y=130)
 
     def clear_content(self):
