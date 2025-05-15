@@ -30,6 +30,7 @@ class SleepRecord:
         self.efficiency: float = 0.0
         self.quality: str = "Unknown"
         self.quality_score: float = 0.0
+        #self.latency: float = 0.0
         self.notes: Optional[str] = None
 
     def upload_data(self,
@@ -54,10 +55,13 @@ class SleepRecord:
         if self.duration == 0:
             self.efficiency = 0
             self.quality = "Invalid"
+            #self.latency = 0
             return
 
         total_sleep = self.REM_time + self.deep_sleep_time + self.light_sleep_time
         self.efficiency = round((total_sleep / (self.duration * 60)) * 100, 2)
+        #self.latency = round((self.wake_up_time / (self.duration * 60)) * 100, 2)
+        
 
         deep_ratio = self.deep_sleep_time / (self.duration * 60)
         rem_ratio = self.REM_time / (self.duration * 60)
