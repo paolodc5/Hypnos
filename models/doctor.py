@@ -1,7 +1,6 @@
 from typing import List, TYPE_CHECKING
 from datetime import datetime
 from services.patient_services import get_patients_by_doctor
-from services.doctor_services import load_appointment_slots_by_doctor, load_appointments_by_doctor
 
 
 if TYPE_CHECKING:
@@ -25,7 +24,6 @@ class Doctor:
         self.password = password
         self.patients: List["Patient"] = []
         self.appointment_slots: List["AppointmentSlot"] = []
-        self.appointments: List["Appointment"] = []
 
     # PATIENT MANAGEMENT
     def assign_patient(self, patient: "Patient"):
@@ -77,12 +75,12 @@ class Doctor:
     def load_patients(self):
         self.patients = get_patients_by_doctor(self.doctor_id)
 
+    @staticmethod
+    def get_by_id(doctor_id):
+        # Logica di caricamento dal DB o da file o oggetto simulato
+        return Doctor(doctor_id=doctor_id, name="Luigi", surname="Bianchi", 
+                      specialty="Sleep Medicine", email="luigi.bianchi@example.com", password= "fake123")
 
-    def load_appointment_slots(self):
-        self.appointment_slots = load_appointment_slots_by_doctor(self.doctor_id)
-
-    def load_appointments(self):
-        self.appointments = load_appointments_by_doctor(self.doctor_id)
 
     def __str__(self):
         return f"Doctor({self.doctor_id}, {self.name}, {self.specialty})"

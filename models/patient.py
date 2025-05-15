@@ -1,6 +1,8 @@
 # this file implements the Patient class like in the class diagram we have defined
 # and the methods to interact with the database and the application.
 from typing import List, Optional, TYPE_CHECKING
+import customtkinter as ctk
+import sqlite3
 
 if TYPE_CHECKING:
     from models.questionnaire import Questionnaire
@@ -14,7 +16,9 @@ class Patient:
     def __init__(self, 
                  patient_id: str, 
                  name: str,
-                 surname: str, 
+                 surname: str,
+                 email: str,
+                 password: str,
                  birth_date: str, 
                  age: int,
                  gender: str,
@@ -26,6 +30,8 @@ class Patient:
         self.patient_id = patient_id
         self.name = name
         self.surname = surname
+        self.email = email
+        self.password = password
         self.birth_date = birth_date
         self.doctor_id = doctor_id  # Assigned doctor
         self.age = age
@@ -51,6 +57,20 @@ class Patient:
         """Add a sleep record."""
         self.sleep_records.append(sleep_record)
 
+    # Function to update patient's info
+    def save(self):
+        conn = sqlite3.connect("sleep_monitoring.db")  
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE patient
+            SET email = ?, phone_number = ?
+            WHERE id = ?
+        """, (self.email, self.phone_number, self.patient_id))  
+
+        conn.commit()
+        conn.close()
+
     # Functions to retrieve patient prescription and note data
     def view_prescriptions(self) -> List["Prescription"]:
         """View prescriptions."""
@@ -70,22 +90,25 @@ class Patient:
         return self.appointments
     
     # Functions to retrieve data for the doctor
+    def get_doctor(self):
+        from models.doctor import Doctor
+        return Doctor.get_by_id(self.doctor_id)
+
     def get_questionnaires(self) -> List["Questionnaire"]:
         """Get all questionnaires filled by the patient."""
         return self.questionnaires
+
+    def get_sleep_records(self) -> List["SleepRecord"]:
+        """Get all sleep records of the patient."""
+        return self.sleep_records
+
+    def get_notes(self) -> List["Note"]:
+        """Get all notes for the patient."""
+        return self.notes
     
-
-    def load_prescriptions(self):
-        from services.patient_services import get_prescriptions
-        self.prescriptions = get_prescriptions(self.patient_id)
-
-    def load_notes(self):
-        from services.patient_services import get_notes
-        self.notes = get_notes(self.patient_id)
-
-    def load_sleep_records(self):
-        from services.patient_services import get_sleep_records
-        self.sleep_records = get_sleep_records(self.patient_id)
+    def get_prescriptions(self) -> List["Prescription"]:
+        """Get all prescriptions for the patient."""
+        return self.prescriptions
 
     def __str__(self):
         return f"Patient({self.patient_id}, {self.name}, {self.email})"
