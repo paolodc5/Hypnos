@@ -1,56 +1,81 @@
-from db.connection import get_connection
-# from models.patient import Patient
 import sqlite3
-from typing import List
+
+from db.connection import get_connection
+from models.patient import Patient
+from models.prescription import Prescription
+from models.note import Note
+from models.sleep_record import SleepRecord
 
 def get_prescriptions(pat_id, conn=None):
     if conn is None:
         conn = get_connection()
     cursor = conn.cursor()
-
     cursor.execute("""
-        SELECT * FROM Prescriptions
+        SELECT PrescrID, PatID, DocID, Type, PrescrDate, Content
+        FROM Prescriptions
         WHERE PatID = ?
         ORDER BY rowid DESC
     """, (pat_id,))
-    prescriptions = cursor.fetchall()
-
+    prescriptions = []
+    for row in cursor.fetchall():
+        prescriptions.append(Prescription(
+            prescription_id=row[0],
+            patient_id=row[1],
+            doctor_id=row[2],
+            treatm_type=row[3],
+            prescr_date=row[4],
+            content=row[5]
+        ))
     conn.close()
     return prescriptions
 
-
-def get_notes(pat_id):
-    conn = get_connection()
+def get_notes(pat_id, conn=None):
+    if conn is None:
+        conn = get_connection()
     cursor = conn.cursor()
-
     cursor.execute("""
-        SELECT * FROM Notes
+        SELECT NoteID, PatID, DocID, Content, Date
+        FROM Notes
         WHERE PatID = ?
         ORDER BY Date DESC
     """, (pat_id,))
-    notes = cursor.fetchall()
-
+    notes = []
+    for row in cursor.fetchall():
+        notes.append(Note(
+            note_id=row[0],
+            patient_id=row[1],
+            doctor_id=row[2],
+            content=row[3],
+            date=row[4]
+        ))
     conn.close()
     return notes
 
-
-def get_sleep_data(pat_id):
-    conn = get_connection()
+def get_sleep_records(pat_id, conn=None):
+    if conn is None:
+        conn = get_connection()
     cursor = conn.cursor()
-
     cursor.execute("""
-        SELECT * FROM SleepRecords
+        SELECT Date, PatID, DevID, Hr, SpO2, MovementIdx, SleepCycles
+        FROM SleepRecords
         WHERE PatID = ?
         ORDER BY Date DESC
     """, (pat_id,))
-    records = cursor.fetchall()
-
+    records = []
+    for row in cursor.fetchall():
+        records.append(SleepRecord(
+            date=row[0],
+            patient_id=row[1],
+            device_id=row[2],
+            hr=row[3],
+            spo2=row[4],
+            movement_idx=row[5],
+            sleep_cycles=row[6]
+        ))
     conn.close()
     return records
 
-
 def get_patients_by_doctor(doc_id: int):
-    from models.patient import Patient
     conn = get_connection()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()

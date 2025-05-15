@@ -1,12 +1,16 @@
 # appointment.py
-from models.doctor import Doctor
-from models.patient import Patient
-from models.appointment_slot import AppointmentSlot
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from models.doctor import Doctor
+    from models.patient import Patient
+    from models.appointment_slot import AppointmentSlot
 
 class Appointment:
     def __init__(self, 
                  appointment_id: int, 
-                 slot: AppointmentSlot, 
+                 slot: "AppointmentSlot", 
                  patient_id: str, 
                  doctor_id: str,
                  confirmed: bool = False):

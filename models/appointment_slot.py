@@ -5,8 +5,8 @@ class AppointmentSlot:
     def __init__(self, 
                  slot_id: int, 
                  doctor_id: str, 
-                 start_time: datetime, 
-                 end_time: datetime):
+                 start_time: "datetime", 
+                 end_time: "datetime"):
         self.slot_id = slot_id
         self.doctor_id = doctor_id  # It's clearer to use "_id" for foreign keys
         self.start_time = start_time

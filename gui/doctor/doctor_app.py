@@ -95,6 +95,10 @@ class DoctorApp(ctk.CTk):
         ctk.CTkLabel(self.patient_info_frame, text=f"Phone: {patient.phone_number}").pack(anchor="w", padx=10)
         # You can also add a "View Full Profile" button if needed
 
+
+
+
+
     # def load_prescriptions(self):
     #     self.clear_content()
     #     show_prescriptions(self.content_frame, self.doctor_id)

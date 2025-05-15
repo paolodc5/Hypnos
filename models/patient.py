@@ -73,18 +73,19 @@ class Patient:
     def get_questionnaires(self) -> List["Questionnaire"]:
         """Get all questionnaires filled by the patient."""
         return self.questionnaires
-
-    def get_sleep_records(self) -> List["SleepRecord"]:
-        """Get all sleep records of the patient."""
-        return self.sleep_records
-
-    def get_notes(self) -> List["Note"]:
-        """Get all notes for the patient."""
-        return self.notes
     
-    def get_prescriptions(self) -> List["Prescription"]:
-        """Get all prescriptions for the patient."""
-        return self.prescriptions
+
+    def load_prescriptions(self):
+        from services.patient_services import get_prescriptions
+        self.prescriptions = get_prescriptions(self.patient_id)
+
+    def load_notes(self):
+        from services.patient_services import get_notes
+        self.notes = get_notes(self.patient_id)
+
+    def load_sleep_records(self):
+        from services.patient_services import get_sleep_records
+        self.sleep_records = get_sleep_records(self.patient_id)
 
     def __str__(self):
         return f"Patient({self.patient_id}, {self.name}, {self.email})"

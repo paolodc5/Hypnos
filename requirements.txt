@@ -4,11 +4,9 @@ pandas>=1.5.0
 matplotlib>=3.6.0
 customtkinter
 
-
 # === OTHER USEFUL UTILITIES ===
 tqdm>=4.65.0
-
-
+Faker>=24.0.0
 
 # === INSTALLATION INSTRUCTIONS ===
 # To install all the required packages in a virtual environment, run the following in your terminal:

@@ -42,10 +42,9 @@ def create_tables(conn=None):
     # Prescriptions table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Prescriptions (
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+            PrescrID INTEGER PRIMARY KEY AUTOINCREMENT,
             PatID INTEGER,
             Type TEXT,
-            PrescrID TEXT,
             Content TEXT,
             DocID INTEGER,
             PrescrDate TEXT,
@@ -134,7 +133,7 @@ def create_tables(conn=None):
     # Appointment table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Appointment (
-            ID INTEGER PRIMARY KEY,
+            ID INTEGER PRIMARY KEY AUTOINCREMENT,
             SlotID TEXT,
             DocID INTEGER,
             PatID INTEGER,
