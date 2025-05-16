@@ -102,3 +102,23 @@ def get_patients_by_doctor(doc_id: int):
         patients.append(patient)
 
     return patients
+
+def get_all_doctors():
+    from db.connection import get_connection
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DocID, Surname FROM Therapist")
+    doctors = [{"DocID": row[0], "Surname": row[1]} for row in cursor.fetchall()]
+    conn.close()
+    return doctors
+
+def add_patient_to_db(name, surname, age, birth_date, gender, fiscal_code, phone_number, doctor_id):
+    from db.connection import get_connection
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO Patients (Name, Surname, Age, DateOfBirth, Gender, FiscalCode, PhoneNumber, DocID)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (name, surname, age, birth_date, gender, fiscal_code, phone_number, doctor_id))
+    conn.commit()
+    conn.close()
