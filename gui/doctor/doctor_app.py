@@ -4,26 +4,31 @@ from models.doctor import Doctor
 from gui.doctor.sidebar import Sidebar
 from gui.doctor.home_tab import HomeTab
 from gui.doctor.patient_tab import PatientTab
-# from gui.doctor.prescription_tab import PrescriptionTab
-# etc.
 
 class DoctorApp(ctk.CTk):
     def __init__(self, doctor: Doctor):
         super().__init__()
         self.title("Hypnos - Doctor Dashboard")
-        self.geometry("1000x600")
+        self.geometry("1100x650")
         self.doctor = doctor
         self.doctor.load_patients()
 
-        self.setup_layout()
-        self.show_home()
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
 
-    def setup_layout(self):
         self.sidebar = Sidebar(self, command_callback=self.handle_sidebar_command)
-        self.sidebar.pack(side="left", fill="y")
+        self.sidebar.grid(row=0, column=0, sticky="ns")
 
-        self.content_frame = ctk.CTkFrame(self)
-        self.content_frame.pack(side="right", fill="both", expand=True)
+        self.content_frame = ctk.CTkFrame(
+            self, 
+            fg_color="#ffffff", 
+            corner_radius=10, 
+            border_width=1,
+            border_color="#d1d5db"
+        )
+        self.content_frame.grid(row=0, column=1, sticky="nsew")
+
+        self.show_home()
 
     def clear_content(self):
         for widget in self.content_frame.winfo_children():
@@ -36,8 +41,6 @@ class DoctorApp(ctk.CTk):
                 self.show_home()
             case "patients":
                 self.show_patients()
-            # case "prescriptions":
-            #     self.show_prescriptions()
 
     def show_home(self):
         HomeTab(self.content_frame, self.doctor).pack(fill="both", expand=True)

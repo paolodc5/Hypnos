@@ -32,7 +32,7 @@ from models.patient import Patient
 
 # Example patient (adjust IDs and fields as needed)
 test_patient = Patient(
-    patient_id=1,
+    patient_id=3,
     name="Mario",
     surname="Rossi",
     birth_date="1980-01-01",
