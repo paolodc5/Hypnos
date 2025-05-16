@@ -1,6 +1,6 @@
 from typing import Optional, List
 from statistics import mean
-from models.wearable import Wearable
+from models.wearable import WearableDevice
 
 class SleepRecord:
     def __init__(self, 
