@@ -1,72 +1,83 @@
 import customtkinter as ctk
 from models.patient import Patient
 import os
+import sqlite3
+from PIL import Image, ImageTk
+from datetime import datetime
 
 class PatientApp(ctk.CTk):
     def __init__(self, patient: Patient):
         super().__init__()
         self.title(f"Hypnos - Patient Dashboard")
-        self.geometry("1000x600")
+        self.geometry("1100x900")
         self.patient = patient
         # self.patient.load_patients()
-
 
         self.setup_gui()
         self.load_home()
 
 
     def setup_gui(self):
+        # Set appearance to dark, matching your brand
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("blue")  # Optional, as we'll use custom colors
 
-        # Set up the sidebar
-        self.sidebar = ctk.CTkFrame(self, width=200, height=500, fg_color="#204080")
+        # Set up the sidebar with deep navy and rounded edges
+        self.sidebar = ctk.CTkFrame(self, width=240, fg_color="#0D1B2A", corner_radius=0)
         self.sidebar.pack(side="left", fill="y")
-        self.title("Workspace")
-        self.geometry("800x500")
 
-
-        # Set up the main window
-        self.content_frame = ctk.CTkFrame(self, width=800)
+        # Set up the main window with dark background
+        self.content_frame = ctk.CTkFrame(self, fg_color="#1B263B")
         self.content_frame.pack(side="right", fill="both", expand=True)
-        
-        # Set appearance and theme
-        ctk.set_appearance_mode("light")
-        ctk.set_default_color_theme("blue")  # Predefined blue theme
 
-        # Sidebar title
-        ctk.CTkLabel(self.sidebar, text="E-Health System", font=("Arial", 16, "bold"), text_color="white", width=200, 
-                     height=30, anchor="center").place(x=0, y=30)
+        # --- Logo ---
+        logo_path = os.path.join(os.path.dirname(__file__), "../images/Hypnos_Logo.png")
+        logo_image = ctk.CTkImage(Image.open(logo_path), size=(100, 100))
+        ctk.CTkLabel(self.sidebar, image=logo_image, text="", bg_color="transparent").pack(pady=(30, 10))
 
-        # Navigation buttons
-        self.home_button = ctk.CTkButton(self.sidebar, text="Home", command=self.load_home, width=160, fg_color="#3366cc", 
-                                         hover_color="#66d9cc").place(x=20, y=80)
-        
-        self.myprofile_button = ctk.CTkButton(self.sidebar, text="My Profile", command=self.load_my_profile, width=160, 
-                                              fg_color="#3366cc", hover_color="#66d9cc")
-        self.myprofile_button.place(x=20, y=130)
+        # --- Sidebar Title ---
+        ctk.CTkLabel(
+            self.sidebar,
+            text="HYPNOS",
+            font=("Helvetica", 22, "bold"),
+            text_color="#F0EDEE"
+        ).pack(pady=(0, 20))
 
-        self.prescriptions_button = ctk.CTkButton(self.sidebar, text="My Prescriptions", command=self.load_prescriptions, width=160, 
-                                                  fg_color="#3366cc", hover_color="#66d9cc")
-        self.prescriptions_button.place(x=20, y=180) 
+        # --- Buttons style ---
+        button_style = {
+            "width": 180,
+            "corner_radius": 20,
+            "font": ("Helvetica", 16, "bold"),
+            "fg_color": "#3366cc",
+            "hover_color": "#66d9cc",
+        }
 
-        self.mydoctor_button = ctk.CTkButton(self.sidebar, text="Sleep Specialist's Profile", command=self.load_doctor_profile, 
-                                             width=160, fg_color="#3366cc", hover_color="#66d9cc")
-        self.mydoctor_button.place(x=20, y=230)
+        # --- Navigation buttons ---
+        ctk.CTkButton(self.sidebar, text="Home", command=self.load_home, **button_style).pack(pady=8)
+        ctk.CTkButton(self.sidebar, text="My Profile", command=self.load_my_profile, **button_style).pack(pady=8)
+        ctk.CTkButton(self.sidebar, text="Prescriptions", command=self.load_prescriptions, **button_style).pack(pady=8)
+        ctk.CTkButton(self.sidebar, text="Doctor", command=self.load_doctor_profile, **button_style).pack(pady=8)
+        ctk.CTkButton(self.sidebar, text="Sleep Records", command=self.load_sleep_records, **button_style).pack(pady=8)
+        ctk.CTkButton(self.sidebar, text="Questionnaires", command=self.load_questionnaires, **button_style).pack(pady=8)
+        ctk.CTkButton(self.sidebar, text="Notes", command=self.load_notes, **button_style).pack(pady=8)
 
-        self.myreports_button = ctk.CTkButton(self.sidebar, text="My Sleep Records", width=160, fg_color="#3366cc", 
-                                                  hover_color="#66d9cc")
-        self.myreports_button.place(x=20, y=280)
-        
-        self.notes_button = ctk.CTkButton(self.sidebar, text="Personal Notes", command=self.load_notes, width=160, fg_color="#3366cc", 
-                                                  hover_color="#66d9cc")
-        self.notes_button.place(x=20, y=330)
+        # --- Spacer ---
+        ctk.CTkFrame(self.sidebar, fg_color="transparent", height=1).pack(expand=True, fill="both")
 
-        self.faq_button = ctk.CTkButton(self.sidebar, text= "FAQs", width=160, 
-                                        fg_color="#3366cc", hover_color="#66d9cc")
-        self.faq_button.place(x=20, y=380)
+        # --- FAQ Circle Button ---
+        ctk.CTkButton(self.sidebar, text="FAQ", **button_style).pack(pady=(0, 15))
 
-        self.qsts_button = ctk.CTkButton(self.sidebar, text="My Questionnaires", width=160, fg_color="#3366cc", 
-                                         hover_color="#66d9cc")
-        self.qsts_button.place(x=20, y=430)
+        # --- Appearance Mode Switch ---
+        self.appearance_mode_menu = ctk.CTkOptionMenu(
+            self.sidebar, values=["Light", "Dark", "System"],
+            command=self.change_appearance_mode_event,
+            width=180, fg_color="#3366cc", corner_radius=20,
+            font=("Helvetica", 14, "bold")
+        )
+        self.appearance_mode_menu.pack(pady=(0, 30))
+
+    def change_appearance_mode_event(self, new_appearance_mode):
+            ctk.set_appearance_mode(new_appearance_mode)
 
 
     def clear_content(self):
@@ -77,48 +88,290 @@ class PatientApp(ctk.CTk):
 
     def load_home(self):
         self.clear_content()
-        ctk.CTkLabel(self.content_frame, text=f"Welcome back, {(self.patient.surname), (self.patient.name)}", 
-                     font=("Arial", 18), text_color="#204080", width=600, height=50 ).place(x=0, y=225)
 
+        # --- Main card ---
+        card = ctk.CTkFrame(self.content_frame, corner_radius=30, fg_color="#1B263B", border_width=0)
+        card.pack(pady=40, padx=80, fill="both", expand=True)
 
-    """def load_profile(self):
-        self.clear_main_content()
-        label = ctk.CTkLabel(self.content_frame, text=f
-            Name: {self.patient.name}
-            Surname: {self.patient.surname}
-            Fiscal code: {self.patient.fiscal_code}
-            Gender: {self.patient.gender}
-            Age: {self.patient.age}
-            Email: {self.patient.email}
-        , font=("Arial", 18), justify="left")
-        label.pack(pady=40)"""
+        # Add logo at top center
+        logo_path = os.path.join(os.path.dirname(__file__), "../images/Hypnos.png")
+        logo_image = ctk.CTkImage(Image.open(logo_path), size=(120, 120))
+        ctk.CTkLabel(card, image=logo_image, text="", bg_color="transparent").pack(pady=(20, 10))
+
+        # Welcome title
+        welcome_title = ctk.CTkLabel(
+            card,
+            text=f"🌙 Hello {self.patient.name} {self.patient.surname}",
+            font=("Helvetica", 30, "bold"),
+            text_color="#F0EDEE"
+        )
+        welcome_title.pack(pady=(0, 10))
+
+        # Subtitle in soft grey-blue
+        subtitle = ctk.CTkLabel(
+            card,
+            text="Track, understand, and improve your sleep habits.",
+            font=("Helvetica", 16),
+            text_color="#CBD5E0"
+        )
+        subtitle.pack(pady=(0, 30))
+
+        # --- Quick Actions ---
+        actions_frame = ctk.CTkFrame(card, fg_color="transparent")
+        actions_frame.pack(pady=10)
+
+        button_style = {
+            "width": 180,
+            "height": 55,
+            "corner_radius": 25,
+            "font": ("Helvetica", 15, "bold")
+        }
+
+        ctk.CTkButton(
+            actions_frame, text="📊 Sleep Records", command=self.load_sleep_records,
+            fg_color="#63B3ED", hover_color="#7CC4F0", **button_style
+        ).pack(side="left", padx=12)
+
+        ctk.CTkButton(
+            actions_frame, text="💊 Prescriptions", command=self.load_prescriptions,
+            fg_color="#9F7AEA", hover_color="#B084F7", **button_style
+        ).pack(side="left", padx=12)
+
+        ctk.CTkButton(
+            actions_frame, text="👩‍⚕️ My Doctor", command=self.load_doctor_profile,
+            fg_color="#FFB347", hover_color="#FFC980", **button_style
+        ).pack(side="left", padx=12)
+
+        # Divider
+        ctk.CTkFrame(card, height=1, fg_color="#2D3748").pack(fill="x", padx=60, pady=40)
+
+        # --- Motivational Block ---
+        tip_frame = ctk.CTkFrame(card, fg_color="#0D1B2A", corner_radius=20)
+        tip_frame.pack(pady=10, padx=50, fill="x")
+
+        tip_label = ctk.CTkLabel(
+            tip_frame,
+            text="💡 Tip:\nConsistent sleep and wake times support your circadian rhythm.\nLet’s build that routine.",
+            font=("Helvetica", 16, "italic"),
+            text_color="#63B3ED",
+            justify="center"
+        )
+        tip_label.pack(pady=20, padx=20)
 
     def load_my_profile(self):
         self.clear_content()
 
-        # Card centrale
-        card = ctk.CTkFrame(self.content_frame, corner_radius=15, fg_color="#f0f4f7")
-        card.pack(pady=50, padx=50, fill="both", expand=True)
+        # --- Main card with dark background ---
+        card = ctk.CTkFrame(self.content_frame, corner_radius=25, fg_color="#1B263B")
+        card.pack(pady=50, padx=60, fill="both", expand=True)
 
-        title = ctk.CTkLabel(card, text="My Profile", font=("Arial", 22, "bold"), text_color="#204080")
+        # --- Title with accent color ---
+        title = ctk.CTkLabel(
+            card,
+            text="👤 My Profile",
+            font=("Helvetica", 28, "bold"),
+            text_color="#63B3ED"
+        )
+        title.pack(pady=(30, 10))
+
+        # --- Info block in semi-transparent dark frame ---
+        info_frame = ctk.CTkFrame(card, fg_color="#0D1B2A", corner_radius=20)
+        info_frame.pack(pady=30, padx=50, fill="x")
+
+        label_style = {
+            "font": ("Helvetica", 16),
+            "text_color": "#F0EDEE"
+        }
+
+        ctk.CTkLabel(info_frame, text=f"👤 Name: {self.patient.name} {self.patient.surname}", **label_style).pack(pady=10, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"🎂 Birthdate: {self.patient.birth_date}", **label_style).pack(pady=10, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"📧 Email: {self.patient.email}", **label_style).pack(pady=10, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"📞 Phone: {self.patient.phone_number}", **label_style).pack(pady=10, anchor="w", padx=20)
+
+        # --- Decorative divider ---
+        ctk.CTkFrame(card, height=2, fg_color="#63B3ED").pack(fill="x", padx=80, pady=30)
+
+        # --- Update Button ---
+        update_button = ctk.CTkButton(
+            card,
+            text="✏️ Update Info",
+            fg_color="#3366CC",
+            hover_color="#5588DD",
+            width=180,
+            height=50,
+            corner_radius=25,
+            font=("Helvetica", 16, "bold"),
+            command=self.show_update_form
+        )
+        update_button.pack(pady=20)
+
+
+
+
+
+
+
+    def load_sleep_records(self, selected_day=None):
+        self.clear_content()
+
+        # Example: Two days of sleep records (replace with your real data)
+        sleep_records = {
+            "2024-05-15": {
+                "total_sleep": "7h 30m",
+                "time_in_bed": "8h 15m",
+                "efficiency": "91%",
+                "hr_during_sleep": "65 bpm",
+                "Sleep_Score": 82,
+                "latency": "15 min",
+                "rem_phase": "1h 20m",
+                "deep_phase": "1h 45m",
+                "light_phase": "4h 25m",
+            },
+            "2024-05-16": {
+                "total_sleep": "6h 50m",
+                "time_in_bed": "7h 40m",
+                "efficiency": "89%",
+                "hr_during_sleep": "67 bpm",
+                "Sleep_Score": 75,
+                "latency": "18 min",
+                "rem_phase": "1h 10m",
+                "deep_phase": "1h 30m",
+                "light_phase": "4h 10m",
+            }
+        }
+        days = list(sleep_records.keys())
+        if not days:
+            ctk.CTkLabel(self.content_frame, text="No sleep records available.", font=("Helvetica", 18), text_color="red").pack(pady=40)
+            return
+        if selected_day is None or selected_day not in days:
+            selected_day = days[0]
+        record = sleep_records[selected_day]
+
+        # --- Sliding bar for days ---
+        bar_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        bar_frame.pack(fill="x", padx=30, pady=(20, 10))
+
+        for day in days:
+            btn = ctk.CTkButton(
+                bar_frame,
+                text=day,
+                fg_color="#5a86ff" if day == selected_day else "#d6d9e6",
+                text_color="white" if day == selected_day else "#204080",
+                corner_radius=15,
+                command=lambda d=day: self.load_sleep_records(selected_day=d),
+                width=120
+            )
+            btn.pack(side="left", padx=10)
+
+        # --- Main card ---
+        card = ctk.CTkFrame(self.content_frame, corner_radius=20, fg_color="#f0f4f7", border_width=5, border_color="#d6d9e6")
+        card.pack(pady=20, padx=50, fill="both", expand=True)
+
+        # Title
+        title = ctk.CTkLabel(card, text=f"Sleep Records - {self.patient.name} {self.patient.surname} ({selected_day})", font=("Helvetica", 24, "bold"), text_color="#5a86ff")
         title.pack(pady=(20, 10))
 
-        info_frame = ctk.CTkFrame(card, fg_color="transparent")
-        info_frame.pack(pady=20)
+        grid_frame = ctk.CTkFrame(card, fg_color="transparent")
+        grid_frame.pack(fill="both", expand=True, padx=30, pady=5)
 
-        ctk.CTkLabel(info_frame, text=f"👤 Name: {self.patient.name} {self.patient.surname}", font=("Arial", 16)).pack(pady=5, anchor="w")
-        ctk.CTkLabel(info_frame, text=f"🎂 Birthdate: {self.patient.birth_date}", font=("Arial", 16)).pack(pady=5, anchor="w")
-        ctk.CTkLabel(info_frame, text=f"📧 Email: {self.patient.email}", font=("Arial", 16)).pack(pady=5, anchor="w")
-        """self.email_entry = ctk.CTkEntry(self.content_frame)
-        self.email_entry.insert(0, self.patient.email)
-        self.email_entry.pack()"""
-        ctk.CTkLabel(info_frame, text=f"📞 Phone: {self.patient.phone_number}", font=("Arial", 16)).pack(pady=5, anchor="w")
-        """self.phone_entry = ctk.CTkEntry(self.content_frame)
-        self.phone_entry.insert(0, getattr(self.patient, "phone_number", ""))  # se ce l’hai
-        self.phone_entry.pack()"""
-        update_button = ctk.CTkButton(card, text="Update Info", fg_color="#33aa66", hover_color="#55cc88",
-                                      command=self.show_update_form, width=120)
-        update_button.pack(pady=20)
+        widget_defs = [
+            (0, 0, "Total Sleep", "total_sleep", "7h 30m"),
+            (0, 1, "Time in Bed", "time_in_bed", "8h 15m"),
+            (1, 0, "Sleep Efficiency", "efficiency", "91%"),
+            (1, 1, "Avg HR During Sleep", "hr_during_sleep", "65 bpm"),
+        ]
+
+        for row, col, label, attr, default in widget_defs:
+            widget = ctk.CTkFrame(grid_frame, corner_radius=15, fg_color="#d6d9e6", width=250, height=130)
+            widget.grid(row=row, column=col, padx=5, pady=5, sticky="ew")
+            container = ctk.CTkFrame(widget, fg_color="transparent")
+            container.pack(fill="x", padx=15, pady=15)
+            ctk.CTkLabel(container, text=label, font=("Helvetica", 22), text_color="#5a86ff").pack(side="left", expand=True, anchor="w")
+            ctk.CTkLabel(container, text=record.get(attr, default), font=("Helvetica", 22, "bold"), text_color="#5a86ff").pack(side="right", anchor="e")
+
+        # Widget 5: Sleep Score
+        widget5 = ctk.CTkFrame(grid_frame, corner_radius=15, fg_color="#d6d9e6", width=510, height=130)
+        widget5.grid(row=2, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
+        container = ctk.CTkFrame(widget5, fg_color="transparent")
+        container.pack(fill="x", padx=15, pady=10)
+        ctk.CTkLabel(container, text="Sleep Score", font=("Helvetica", 22), text_color="#5a86ff").pack(side="left", anchor="w")
+        score = record.get("Sleep_Score", 66)
+        ctk.CTkLabel(container, text=str(score), font=("Helvetica", 22, "bold"), text_color="#5a86ff").pack(side="right", anchor="e")
+        progress_container = ctk.CTkFrame(widget5, fg_color="transparent")
+        progress_container.pack(fill="x", padx=15, pady=(5, 10))
+        score_bar = ctk.CTkProgressBar(progress_container, height=12, progress_color="#5a86ff")
+        score_bar.set(float(score) / 100)
+        score_bar.pack(fill="x")
+
+        # Make columns and rows expandable
+        for i in range(2):
+            grid_frame.grid_columnconfigure(i, weight=1)
+        for i in range(3):
+            grid_frame.grid_rowconfigure(i, weight=0)
+
+        # Sleep Features Section Title
+        features_title = ctk.CTkLabel(card, text="Sleep Features", font=("Helvetica", 20, "bold"), text_color="#204080")
+        features_title.pack(pady=(20, 5), padx=30, anchor="w")
+
+        # Features Frame (full width)
+        features_frame = ctk.CTkFrame(card, fg_color="#e9ecf5", corner_radius=12)
+        features_frame.pack(fill="x", padx=30, pady=(0, 20))
+
+        features = [
+            ("Total Sleep Amount", "total_sleep", "7h 30m"),
+            ("Efficiency", "efficiency", "91%"),
+            ("Latency", "latency", "15 min"),
+            ("REM phase", "rem_phase", "1h 20m"),
+            ("Deep state phase", "deep_phase", "1h 45m"),
+            ("Light state phase", "light_phase", "4h 25m"),
+        ]
+
+        for name, attr, default in features:
+            row = ctk.CTkFrame(features_frame, fg_color="transparent")
+            row.pack(fill="x", pady=2, padx=10)
+            # Fixed width for name label, no expand/fill
+            ctk.CTkLabel(row, text=name, font=("Helvetica", 16), anchor="w", width=220, text_color="#204080").pack(side="left")
+            # Value label right, no expand/fill
+            ctk.CTkLabel(row, text=str(record.get(attr, default)), font=("Helvetica", 16, "bold"), anchor="e", text_color="#5a86ff").pack(side="right")
+
+    def fetch_sleep_records(self):
+        # Connect to your SQLite database
+        conn = sqlite3.connect("insomnia_patient_30days.db")
+        cursor = conn.cursor()
+        # Adjust the table/column names as needed
+        cursor.execute("""
+            SELECT 
+                date, total_sleep, time_in_bed, efficiency, hr_during_sleep, Sleep_Score,
+                latency, rem_phase, deep_phase, light_phase
+            FROM sleep_records
+            WHERE patient_id = ?
+            ORDER BY date DESC
+            LIMIT 30
+        """, (self.patient.patient_id,))
+        rows = cursor.fetchall()
+        conn.close()
+
+        # Build a dict: {date: {...data...}}
+        records = {}
+        for row in rows:
+            (date, total_sleep, time_in_bed, efficiency, hr_during_sleep, sleep_score,
+            latency, rem_phase, deep_phase, light_phase) = row
+            records[date] = {
+                "total_sleep": total_sleep,
+                "time_in_bed": time_in_bed,
+                "efficiency": efficiency,
+                "hr_during_sleep": hr_during_sleep,
+                "Sleep_Score": sleep_score,
+                "latency": latency,
+                "rem_phase": rem_phase,
+                "deep_phase": deep_phase,
+                "light_phase": light_phase,
+            }
+        return records
+
+
+
+
 
     def show_update_form(self):
         self.clear_content()
@@ -162,45 +415,80 @@ class PatientApp(ctk.CTk):
         # Torna al profilo aggiornato
         self.load_my_profile()
 
-
-    """def load_doctor_profile(self):
-        self.clear_content()
-        doctor = self.patient.get_doctor()
-        if not doctor:
-                error_label = ctk.CTkLabel(self.content_frame, text="No doctor assigned.", font=("Arial", 16), text_color="red")
-                error_label.pack(pady=40)
-                return
-        
-        label = ctk.CTkLabel(self.content_frame, text=f
-            Name: {doctor.name}
-            Surname: {doctor.surname}
-            Specialization: {doctor.specialty}
-            Email: {doctor.email}
-        , font=("Arial", 18), justify="left")
-        label.pack(pady=40)"""
-
     def load_doctor_profile(self):
         self.clear_content()
+
         doctor = self.patient.get_doctor()
 
-        # Cornice centrale tipo "card"
-        card = ctk.CTkFrame(self.content_frame, corner_radius=15, fg_color="#f0f4f7")
-        card.pack(pady=50, padx=50, fill="both", expand=True)
+        # --- Main card with dark background ---
+        card = ctk.CTkFrame(self.content_frame, corner_radius=25, fg_color="#1B263B")
+        card.pack(pady=50, padx=60, fill="both", expand=True)
 
-        title = ctk.CTkLabel(card, text="Your Sleep Specialist", font=("Arial", 22, "bold"), text_color="#204080")
-        title.pack(pady=(20, 10))
+        # --- Title with accent color ---
+        title = ctk.CTkLabel(
+            card,
+            text="👨‍⚕️ Your Sleep Specialist",
+            font=("Helvetica", 28, "bold"),
+            text_color="#63B3ED"
+        )
+        title.pack(pady=(30, 10))
 
-        # Dati visualizzati in colonne/righe
-        info_frame = ctk.CTkFrame(card, fg_color="transparent")
-        info_frame.pack(pady=20)
+        # --- Info block in semi-transparent dark frame ---
+        info_frame = ctk.CTkFrame(card, fg_color="#0D1B2A", corner_radius=20)
+        info_frame.pack(pady=30, padx=50, fill="x")
 
-        ctk.CTkLabel(info_frame, text=f"👤 Name: {doctor.name} {doctor.surname}", font=("Arial", 16)).pack(pady=5, anchor="w")
-        ctk.CTkLabel(info_frame, text=f"🩺 Specialty: {doctor.specialty}", font=("Arial", 16)).pack(pady=5, anchor="w")
-        ctk.CTkLabel(info_frame, text=f"📧 Email: {doctor.email}", font=("Arial", 16)).pack(pady=5, anchor="w")
+        label_style = {
+            "font": ("Helvetica", 16),
+            "text_color": "#F0EDEE"
+        }
 
-        # Opzionale: bottone per contattare il dottore
-        contact_button = ctk.CTkButton(card, text="Contact Doctor", fg_color="#3366cc", hover_color="#66d9cc")
-        contact_button.pack(pady=(10, 20))
+        ctk.CTkLabel(info_frame, text=f"👤 Name: {doctor.name} {doctor.surname}", **label_style).pack(pady=10, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"🩺 Specialty: {doctor.specialty}", **label_style).pack(pady=10, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"📧 Email: {doctor.email}", **label_style).pack(pady=10, anchor="w", padx=20)
+
+        # --- Decorative divider ---
+        ctk.CTkFrame(card, height=2, fg_color="#63B3ED").pack(fill="x", padx=80, pady=30)
+
+        # --- Contact Button ---
+        contact_button = ctk.CTkButton(
+            card,
+            text="✉️ Contact Doctor",
+            fg_color="#3366CC",
+            hover_color="#5588DD",
+            width=200,
+            height=50,
+            corner_radius=25,
+            font=("Helvetica", 16, "bold")
+        )
+        contact_button.pack(pady=20)
+
+
+    def load_notes(self):
+        self.clear_content()
+
+        # Simuliamo il caricamento di note dal database
+        notes = self.patient.get_notes()  # Supponiamo che restituisca una lista di Note
+
+        notes_label = ctk.CTkLabel(self.content_frame, text="Your Notes:", font=("Arial", 16))
+        notes_label.pack(pady=10)
+
+        for note in notes:
+            ctk.CTkLabel(self.content_frame, text=f"{note.date}: {note.content}", font=("Arial", 14)).pack(anchor="w", padx=20)
+
+        # Area per inserire una nuova nota
+        self.note_entry = ctk.CTkTextbox(self.content_frame, height=100, width=500)
+        self.note_entry.pack(pady=10)
+
+        save_button = ctk.CTkButton(self.content_frame, text="Add Note", command=self.save_note)
+        save_button.pack()
+
+    def save_note(self):
+        content = self.note_entry.get("1.0", "end").strip()
+        if content:
+            self.patient.add_note(content)  # Salva nel DB o lista
+            self.load_notes()  # Ricarica la sezione
+
+
 
     def load_prescriptions(self):
         self.clear_content()
@@ -295,51 +583,294 @@ class PatientApp(ctk.CTk):
             details_label = ctk.CTkLabel(frame, text=f"Date: {exam['date']} | Location: {exam['location']}", font=("Arial", 12))
             details_label.pack(anchor="w", padx=10, pady=(0, 5))
 
-
-
-    def load_notes(self):
+    def load_sleep_records(self, selected_day=None):
         self.clear_content()
 
-        # Simuliamo il caricamento di note dal database
-        notes = self.patient.get_notes()  # Supponiamo che restituisca una lista di Note
+        # Example: Two days of sleep records (replace with your real data)
+        sleep_records = {
+            "2024-05-15": {
+                "total_sleep": "7h 30m",
+                "time_in_bed": "8h 15m",
+                "efficiency": "91%",
+                "hr_during_sleep": "65 bpm",
+                "Sleep_Score": 82,
+                "latency": "15 min",
+                "rem_phase": "1h 20m",
+                "deep_phase": "1h 45m",
+                "light_phase": "4h 25m",
+            },
+            "2024-05-16": {
+                "total_sleep": "6h 50m",
+                "time_in_bed": "7h 40m",
+                "efficiency": "89%",
+                "hr_during_sleep": "67 bpm",
+                "Sleep_Score": 75,
+                "latency": "18 min",
+                "rem_phase": "1h 10m",
+                "deep_phase": "1h 30m",
+                "light_phase": "4h 10m",
+            }
+        }
+        days = list(sleep_records.keys())
+        if not days:
+            ctk.CTkLabel(self.content_frame, text="No sleep records available.", font=("Helvetica", 18), text_color="red").pack(pady=40)
+            return
+        if selected_day is None or selected_day not in days:
+            selected_day = days[0]
+        record = sleep_records[selected_day]
 
-        notes_label = ctk.CTkLabel(self.content_frame, text="Your Notes:", font=("Arial", 16))
-        notes_label.pack(pady=10)
+        # --- Sliding bar for days ---
+        bar_frame = ctk.CTkFrame(self.content_frame, fg_color="transparent")
+        bar_frame.pack(fill="x", padx=30, pady=(20, 10))
 
-        for note in notes:
-            ctk.CTkLabel(self.content_frame, text=f"{note.date}: {note.content}", font=("Arial", 14)).pack(anchor="w", padx=20)
+        for day in days:
+            btn = ctk.CTkButton(
+                bar_frame,
+                text=day,
+                fg_color="#5a86ff" if day == selected_day else "#d6d9e6",
+                text_color="white" if day == selected_day else "#204080",
+                corner_radius=15,
+                command=lambda d=day: self.load_sleep_records(selected_day=d),
+                width=120
+            )
+            btn.pack(side="left", padx=10)
 
-        # Area per inserire una nuova nota
-        self.note_entry = ctk.CTkTextbox(self.content_frame, height=100, width=500)
-        self.note_entry.pack(pady=10)
+        # --- Main card ---
+        card = ctk.CTkFrame(self.content_frame, corner_radius=20, fg_color="#f0f4f7", border_width=5, border_color="#d6d9e6")
+        card.pack(pady=20, padx=50, fill="both", expand=True)
 
-        save_button = ctk.CTkButton(self.content_frame, text="Add Note", command=self.save_note)
-        save_button.pack()
+        # Title
+        title = ctk.CTkLabel(card, text=f"Sleep Records - {self.patient.name} {self.patient.surname} ({selected_day})", font=("Helvetica", 24, "bold"), text_color="#5a86ff")
+        title.pack(pady=(20, 10))
 
-    def save_note(self):
-        content = self.note_entry.get("1.0", "end").strip()
-        if content:
-            self.patient.add_note(content)  # Salva nel DB o lista
-            self.load_notes()  # Ricarica la sezione
+        grid_frame = ctk.CTkFrame(card, fg_color="transparent")
+        grid_frame.pack(fill="both", expand=True, padx=30, pady=5)
 
- # create tabview
-    """ self.tabview = customtkinter.CTkTabview(self, width=250)
-        self.tabview.grid(row=0, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
-        self.tabview.add("CTkTabview")
-        self.tabview.add("Tab 2")
-        self.tabview.add("Tab 3")
-        self.tabview.tab("CTkTabview").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
-        self.tabview.tab("Tab 2").grid_columnconfigure(0, weight=1)
-"""
+        widget_defs = [
+            (0, 0, "Total Sleep", "total_sleep", "7h 30m"),
+            (0, 1, "Time in Bed", "time_in_bed", "8h 15m"),
+            (1, 0, "Sleep Efficiency", "efficiency", "91%"),
+            (1, 1, "Avg HR During Sleep", "hr_during_sleep", "65 bpm"),
+        ]
 
-    # def load_prescriptions(self):
-    #     self.clear_content()
-    #     show_prescriptions(self.content_frame, self.doctor_id)
+        for row, col, label, attr, default in widget_defs:
+            widget = ctk.CTkFrame(grid_frame, corner_radius=15, fg_color="#d6d9e6", width=250, height=130)
+            widget.grid(row=row, column=col, padx=5, pady=5, sticky="ew")
+            container = ctk.CTkFrame(widget, fg_color="transparent")
+            container.pack(fill="x", padx=15, pady=15)
+            ctk.CTkLabel(container, text=label, font=("Helvetica", 22), text_color="#5a86ff").pack(side="left", expand=True, anchor="w")
+            ctk.CTkLabel(container, text=record.get(attr, default), font=("Helvetica", 22, "bold"), text_color="#5a86ff").pack(side="right", anchor="e")
 
-    # def load_notes(self):
-    #     self.clear_content()
-    #     show_notes(self.content_frame, self.doctor_id)
+        # Widget 5: Sleep Score
+        widget5 = ctk.CTkFrame(grid_frame, corner_radius=15, fg_color="#d6d9e6", width=510, height=130)
+        widget5.grid(row=2, column=0, columnspan=2, padx=5, pady=5, sticky="ew")
+        container = ctk.CTkFrame(widget5, fg_color="transparent")
+        container.pack(fill="x", padx=15, pady=10)
+        ctk.CTkLabel(container, text="Sleep Score", font=("Helvetica", 22), text_color="#5a86ff").pack(side="left", anchor="w")
+        score = record.get("Sleep_Score", 66)
+        ctk.CTkLabel(container, text=str(score), font=("Helvetica", 22, "bold"), text_color="#5a86ff").pack(side="right", anchor="e")
+        progress_container = ctk.CTkFrame(widget5, fg_color="transparent")
+        progress_container.pack(fill="x", padx=15, pady=(5, 10))
+        score_bar = ctk.CTkProgressBar(progress_container, height=12, progress_color="#5a86ff")
+        score_bar.set(float(score) / 100)
+        score_bar.pack(fill="x")
 
-    # def load_sleep_data(self):
-    #     self.clear_content()
-    #     show_sleep_data(self.content_frame, self.doctor_id)
+        # Make columns and rows expandable
+        for i in range(2):
+            grid_frame.grid_columnconfigure(i, weight=1)
+        for i in range(3):
+            grid_frame.grid_rowconfigure(i, weight=0)
+
+        # Sleep Features Section Title
+        features_title = ctk.CTkLabel(card, text="Sleep Features", font=("Helvetica", 20, "bold"), text_color="#204080")
+        features_title.pack(pady=(20, 5), padx=30, anchor="w")
+
+        # Features Frame (full width)
+        features_frame = ctk.CTkFrame(card, fg_color="#e9ecf5", corner_radius=12)
+        features_frame.pack(fill="x", padx=30, pady=(0, 20))
+
+        features = [
+            ("Total Sleep Amount", "total_sleep", "7h 30m"),
+            ("Efficiency", "efficiency", "91%"),
+            ("Latency", "latency", "15 min"),
+            ("REM phase", "rem_phase", "1h 20m"),
+            ("Deep state phase", "deep_phase", "1h 45m"),
+            ("Light state phase", "light_phase", "4h 25m"),
+        ]
+
+        for name, attr, default in features:
+            row = ctk.CTkFrame(features_frame, fg_color="transparent")
+            row.pack(fill="x", pady=2, padx=10)
+            # Fixed width for name label, no expand/fill
+            ctk.CTkLabel(row, text=name, font=("Helvetica", 16), anchor="w", width=220, text_color="#204080").pack(side="left")
+            # Value label right, no expand/fill
+            ctk.CTkLabel(row, text=str(record.get(attr, default)), font=("Helvetica", 16, "bold"), anchor="e", text_color="#5a86ff").pack(side="right")
+
+        def fetch_sleep_records(self):
+            # Connect to your SQLite database
+            conn = sqlite3.connect("insomnia_patient_30days.db")
+            cursor = conn.cursor()
+            # Adjust the table/column names as needed
+            cursor.execute("""
+                SELECT 
+                    date, total_sleep, time_in_bed, efficiency, hr_during_sleep, Sleep_Score,
+                    latency, rem_phase, deep_phase, light_phase
+                FROM sleep_records
+                WHERE patient_id = ?
+                ORDER BY date DESC
+                LIMIT 30
+            """, (self.patient.patient_id,))
+            rows = cursor.fetchall()
+            conn.close()
+
+            # Build a dict: {date: {...data...}}
+            records = {}
+            for row in rows:
+                (date, total_sleep, time_in_bed, efficiency, hr_during_sleep, sleep_score,
+                latency, rem_phase, deep_phase, light_phase) = row
+                records[date] = {
+                    "total_sleep": total_sleep,
+                    "time_in_bed": time_in_bed,
+                    "efficiency": efficiency,
+                    "hr_during_sleep": hr_during_sleep,
+                    "Sleep_Score": sleep_score,
+                    "latency": latency,
+                    "rem_phase": rem_phase,
+                    "deep_phase": deep_phase,
+                    "light_phase": light_phase,
+                }
+            return records
+        
+    def load_questionnaires(self, selected_day=None):
+        self.clear_content()
+
+        # Example ISI data for multiple days
+        isi_data = {
+            "2024-05-15": {"total_score": 18, "severity": "Moderate", "responses": [
+                ("Difficulty falling asleep", 3),
+                ("Difficulty staying asleep", 2),
+                ("Problem waking up early", 3),
+                ("Sleep dissatisfaction", 4),
+                ("Interference with daily functioning", 3),
+                ("Noticeable by others", 2),
+                ("Worry about current sleep", 1)
+            ]},
+            "2024-05-16": {"total_score": 20, "severity": "Severe", "responses": [
+                ("Difficulty falling asleep", 4),
+                ("Difficulty staying asleep", 3),
+                ("Problem waking up early", 4),
+                ("Sleep dissatisfaction", 4),
+                ("Interference with daily functioning", 4),
+                ("Noticeable by others", 3),
+                ("Worry about current sleep", 2)
+            ]},
+            "2024-05-17": {"total_score": 15, "severity": "Moderate", "responses": [
+                ("Difficulty falling asleep", 2),
+                ("Difficulty staying asleep", 2),
+                ("Problem waking up early", 3),
+                ("Sleep dissatisfaction", 3),
+                ("Interference with daily functioning", 2),
+                ("Noticeable by others", 2),
+                ("Worry about current sleep", 1)
+            ]},
+            "2024-05-18": {"total_score": 10, "severity": "Mild", "responses": [
+                ("Difficulty falling asleep", 1),
+                ("Difficulty staying asleep", 1),
+                ("Problem waking up early", 1),
+                ("Sleep dissatisfaction", 2),
+                ("Interference with daily functioning", 1),
+                ("Noticeable by others", 1),
+                ("Worry about current sleep", 1)
+            ]},
+            "2024-05-19": {"total_score": 22, "severity": "Severe", "responses": [
+                ("Difficulty falling asleep", 4),
+                ("Difficulty staying asleep", 4),
+                ("Problem waking up early", 4),
+                ("Sleep dissatisfaction", 4),
+                ("Interference with daily functioning", 4),
+                ("Noticeable by others", 3),
+                ("Worry about current sleep", 3)
+            ]}
+        }
+
+        days = list(isi_data.keys())
+        if selected_day is None or selected_day not in isi_data:
+            selected_day = days[0]
+        record = isi_data[selected_day]
+
+        # --- Top horizontal bar ---
+        bar_frame = ctk.CTkScrollableFrame(self.content_frame, fg_color="transparent", orientation="horizontal", height=60)
+        bar_frame.pack(fill="x", padx=30, pady=(20, 10))
+
+        for day in days:
+            btn = ctk.CTkButton(
+                bar_frame,
+                text=day,
+                fg_color="#5a86ff" if day == selected_day else "#2D3748",
+                text_color="white",
+                hover_color="#7CC4F0",
+                corner_radius=15,
+                width=130,
+                command=lambda d=day: self.load_questionnaires(selected_day=d)  # Dynamic reload with selected day
+            )
+            btn.pack(side="left", padx=8)
+
+        # --- Main card ---
+        card = ctk.CTkFrame(self.content_frame, corner_radius=20, fg_color="#1B263B")
+        card.pack(pady=20, padx=50, fill="both", expand=True)
+
+        ctk.CTkLabel(
+            card,
+            text=f"ISI Questionnaire - {selected_day}",
+            font=("Helvetica", 26, "bold"),
+            text_color="#63B3ED"
+        ).pack(pady=(20, 10))
+
+        ctk.CTkLabel(
+            card,
+            text=f"Total Score: {record['total_score']} ({record['severity']})",
+            font=("Helvetica", 20, "bold"),
+            text_color="#F0EDEE"
+        ).pack(pady=(0, 20))
+
+        # --- Scrollable questionnaire ---
+        scroll_frame = ctk.CTkScrollableFrame(card, fg_color="transparent", corner_radius=15, width=800, height=400)
+        scroll_frame.pack(pady=10, padx=40, fill="both", expand=True)
+
+        likert_labels = ["0 - None", "1 - Mild", "2 - Moderate", "3 - Severe", "4 - Very Severe"]
+
+        for q_text, selected_score in record["responses"]:
+            q_widget = ctk.CTkFrame(scroll_frame, fg_color="#0D1B2A", corner_radius=15, border_width=2, border_color="#2D3748")
+            q_widget.pack(pady=15, padx=20, ipadx=10, ipady=10)
+
+            # Centered question
+            ctk.CTkLabel(
+                q_widget,
+                text=q_text,
+                font=("Helvetica", 16, "bold"),
+                text_color="#CBD5E0",
+                wraplength=700,
+                justify="center"
+            ).pack(pady=(15, 10))
+
+            # Centered Likert scale
+            likert_frame = ctk.CTkFrame(q_widget, fg_color="transparent")
+            likert_frame.pack(pady=10)
+
+            for i, label in enumerate(likert_labels):
+                color = "#63B3ED" if i == selected_score else "#2D3748"
+                text_color = "white" if i == selected_score else "#CBD5E0"
+                ctk.CTkLabel(
+                    likert_frame,
+                    text=label,
+                    font=("Helvetica", 14),
+                    fg_color=color,
+                    text_color=text_color,
+                    corner_radius=10,
+                    width=120,
+                    height=40
+                ).pack(side="left", padx=6)
+
+    def load_questionnaires_for_day(self, selected_day):
+        # For now, just reload with selected day (simulate)
+        self.load_questionnaires()

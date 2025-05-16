@@ -17,4 +17,5 @@ if __name__ == "__main__":
                       age=29, gender="F", phone_number="0987654321", fiscal_code="MRARSS95", doctor_id=1)
 
     app = PatientApp(patient)
+    app.geometry("1200x700")
     app.mainloop()
