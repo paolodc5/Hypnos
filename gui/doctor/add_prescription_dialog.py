@@ -1,63 +1,48 @@
 import customtkinter as ctk
-from services.doctor_services import write_prescription
+from services.doctor_services import write_prescription, get_prescription_types
 
 
 class AddPrescriptionDialog(ctk.CTkToplevel):
     def __init__(self, master, patient):
         super().__init__(master)
-        self.title("➕ New Prescription")
-        self.geometry("480x400")
+        self.title("Add Prescription")
+        self.geometry("400x400")
         self.resizable(False, False)
-        self.configure(fg_color="#f8fafc")
         self.patient = patient
 
-        ctk.CTkLabel(self, text="💊 Add Prescription", font=("Arial", 20, "bold"), text_color="#1e3a8a").pack(pady=(24, 12))
+        ctk.CTkLabel(self, text="Add Prescription", font=("Arial", 18, "bold")).pack(pady=(18, 10))
+        form = ctk.CTkFrame(self, fg_color="#f8fafc", corner_radius=12)
+        form.pack(fill="both", expand=True, padx=16, pady=8)
 
-        # Form frame
-        form = ctk.CTkFrame(self, fg_color="#ffffff", corner_radius=12)
-        form.pack(fill="both", expand=True, padx=24, pady=8)
-        form.grid_columnconfigure(1, weight=1)
+        # Type ComboBox
+        ctk.CTkLabel(form, text="Type:", anchor="w").grid(row=0, column=0, sticky="w", padx=10, pady=2)
+        types = get_prescription_types()
+        self.type_map = {name: tid for tid, name in types}
+        self.type_combo = ctk.CTkComboBox(form, values=list(self.type_map.keys()))
+        self.type_combo.grid(row=0, column=1, padx=10, pady=2)
 
-        # Type input
-        ctk.CTkLabel(form, text="Treatment Type:", font=("Arial", 14), anchor="w", text_color="#334155").grid(row=0, column=0, sticky="w", padx=12, pady=(18, 6))
-        self.type_entry = ctk.CTkEntry(form, height=36, font=("Arial", 13))
-        self.type_entry.grid(row=0, column=1, sticky="ew", padx=12, pady=(18, 6))
+        # Content
+        ctk.CTkLabel(form, text="Content:", anchor="w").grid(row=1, column=0, sticky="w", padx=10, pady=2)
+        self.content_entry = ctk.CTkTextbox(form, height=80)
+        self.content_entry.grid(row=1, column=1, padx=10, pady=2)
 
-        # Content input
-        ctk.CTkLabel(form, text="Content:", font=("Arial", 14), anchor="w", text_color="#334155").grid(row=1, column=0, sticky="nw", padx=12, pady=(6, 12))
-        self.content_entry = ctk.CTkTextbox(form, height=100, font=("Arial", 13), corner_radius=8)
-        self.content_entry.grid(row=1, column=1, sticky="ew", padx=12, pady=(6, 12))
-
-        # Error label
         self.error_label = ctk.CTkLabel(self, text="", text_color="red", font=("Arial", 12, "bold"))
-        self.error_label.pack(pady=(0, 4))
+        self.error_label.pack(pady=(0, 0))
 
-        # Submit button
-        ctk.CTkButton(
-            self,
-            text="✅ Add Prescription",
-            fg_color="#2563eb",
-            hover_color="#1e40af",
-            font=("Arial", 14, "bold"),
-            height=42,
-            width=180,
-            corner_radius=8,
-            command=self.submit
-        ).pack(pady=(8, 20))
+        ctk.CTkButton(self, text="Add", fg_color="#2563eb", hover_color="#1e40af", command=self.submit).pack(pady=18)
 
     def submit(self):
-        treatm_type = self.type_entry.get().strip()
+        type_name = self.type_combo.get().strip()
         content = self.content_entry.get("1.0", "end").strip()
-
-        if not treatm_type or not content:
+        if not type_name or not content:
             self.error_label.configure(text="All fields are required.")
             return
-
+        type_id = self.type_map.get(type_name)
         try:
             write_prescription(
                 pat_id=self.patient.patient_id,
                 doctor_id=self.patient.doctor_id,
-                treatm_type=treatm_type,
+                type_id=type_id,
                 content=content
             )
             self.destroy()

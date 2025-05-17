@@ -1,4 +1,8 @@
 def get_section_config(patient):
+    # You need a mapping from doctor_id to surname for display
+    # Let's assume patient.doctor_map is {doctor_id: surname}
+    doctor_map = getattr(patient, "doctor_map", {})
+
     return {
         "Sleep": {
             "loader": patient.load_sleep_records,
@@ -46,14 +50,15 @@ def get_section_config(patient):
             "title": "💊 Prescriptions",
             "fields_formatter": lambda p: [
                 ("Date", p.precr_date, ""),
+                ("Doctor", doctor_map.get(p.doctor_id, str(p.doctor_id)), ""),  # Show surname
                 ("Type", p.treatm_type, ""),
                 ("Preview", p.content[:30] + ("..." if len(p.content) > 30 else ""), ""),
             ],
-            "column_titles": ["Date", "Type", "Preview"],
+            "column_titles": ["Date", "Doctor", "Type", "Preview"],
             "detail_formatter": lambda p: (
                 f"Date: {p.precr_date}\n"
+                f"Doctor: {doctor_map.get(p.doctor_id, str(p.doctor_id))}\n"
                 f"Type: {p.treatm_type}\n"
-                f"Doctor ID: {p.doctor_id}\n"
                 f"Patient ID: {p.patient_id}\n"
                 f"Prescription ID: {p.prescription_id}\n"
                 f"Content:\n{p.content}"

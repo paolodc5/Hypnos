@@ -11,10 +11,11 @@ def get_prescriptions(pat_id, conn=None):
         conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT PrescrID, PatID, DocID, Type, PrescrDate, Content
-        FROM Prescriptions
-        WHERE PatID = ?
-        ORDER BY rowid DESC
+        SELECT p.PrescrID, p.PatID, p.DocID, t.TypeName, p.PrescrDate, p.Content
+        FROM Prescriptions p
+        JOIN PrescriptionTypes t ON p.TypeID = t.TypeID
+        WHERE p.PatID = ?
+        ORDER BY p.PrescrDate DESC
     """, (pat_id,))
     prescriptions = []
     for row in cursor.fetchall():
@@ -22,7 +23,7 @@ def get_prescriptions(pat_id, conn=None):
             prescription_id=row[0],
             patient_id=row[1],
             doctor_id=row[2],
-            treatm_type=row[3],
+            treatm_type=row[3],  # This is the type name
             prescr_date=row[4],
             content=row[5]
         ))
@@ -112,13 +113,12 @@ def get_all_doctors():
     conn.close()
     return doctors
 
-def add_patient_to_db(name, surname, age, birth_date, gender, fiscal_code, phone_number, doctor_id):
-    from db.connection import get_connection
+def add_patient_to_db(name, surname, age, birth_date, gender, fiscal_code, phone_number, doctor_id, password="12345"):
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO Patients (Name, Surname, Age, DateOfBirth, Gender, FiscalCode, PhoneNumber, DocID)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (name, surname, age, birth_date, gender, fiscal_code, phone_number, doctor_id))
+        INSERT INTO Patients (Name, Surname, Age, DateOfBirth, Gender, FiscalCode, PhoneNumber, DocID, Password)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (name, surname, age, birth_date, gender, fiscal_code, phone_number, doctor_id, password))
     conn.commit()
     conn.close()

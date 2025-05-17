@@ -23,6 +23,7 @@ def create_tables(conn=None):
             Age INTEGER,
             PhoneNumber TEXT,
             DocID INTEGER,
+            Password TEXT NOT NULL,
             FOREIGN KEY (DocID) REFERENCES Therapist(DocID)
         );
     """)
@@ -39,17 +40,26 @@ def create_tables(conn=None):
         );
     """)
 
+    # PrescriptionTypes table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS PrescriptionTypes (
+            TypeID INTEGER PRIMARY KEY AUTOINCREMENT,
+            TypeName TEXT UNIQUE NOT NULL
+        );
+    """)
+
     # Prescriptions table
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Prescriptions (
             PrescrID INTEGER PRIMARY KEY AUTOINCREMENT,
             PatID INTEGER,
-            Type TEXT,
+            TypeID INTEGER,
             Content TEXT,
             DocID INTEGER,
             PrescrDate TEXT,
             FOREIGN KEY (PatID) REFERENCES Patients(PatID),
-            FOREIGN KEY (DocID) REFERENCES Therapist(DocID)
+            FOREIGN KEY (DocID) REFERENCES Therapist(DocID),
+            FOREIGN KEY (TypeID) REFERENCES PrescriptionTypes(TypeID)
         );
     """)
 
@@ -147,12 +157,21 @@ def create_tables(conn=None):
 
     conn.commit()
 
+def insert_prescription_types(conn):
+    cursor = conn.cursor()
+    types = ["drug", "remedies", "visits"]
+    for t in types:
+        cursor.execute("INSERT OR IGNORE INTO PrescriptionTypes (TypeName) VALUES (?)", (t,))
+    conn.commit()
+
 if __name__ == "__main__":
     conn = get_connection()
     print("Connected to the database.")
     if conn is not None:
         create_tables(conn)
         print("Tables created successfully.")
+        insert_prescription_types(conn)
+        print("Prescription types inserted successfully.")
         conn.close()
     else:
         print("Error! Cannot create the database connection.")

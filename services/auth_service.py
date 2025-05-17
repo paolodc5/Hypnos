@@ -15,3 +15,13 @@ def authenticate_doctor(surname: str, password: str) -> Doctor | None:
     if row:
         return Doctor(doctor_id=row["DocID"], name=row["Name"], surname=row['Surname'],email=row["Email"], specialty=row["Specialty"], password=row["Password"])
     return None
+
+def authenticate_patient(fiscal_code, password):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM Patients WHERE FiscalCode = ? AND Password = ?
+    """, (fiscal_code, password))
+    patient = cursor.fetchone()
+    conn.close()
+    return patient

@@ -18,7 +18,7 @@ def insert_fake_therapists(n=10):
             fake.last_name(),
             fake.unique.email(),
             fake.job(),
-            fake.password()
+            "12345"  # Password is always 12345
         ))
     for t in therapists:
         try:
@@ -34,7 +34,6 @@ def insert_fake_therapists(n=10):
 def insert_fake_patients(n=10):
     conn = get_connection()
     cur = conn.cursor()
-    # Get existing therapist IDs
     cur.execute("SELECT DocID FROM Therapist")
     therapist_ids = [row[0] for row in cur.fetchall()]
     patients = []
@@ -49,13 +48,14 @@ def insert_fake_patients(n=10):
             fake.unique.bothify(text="??????##"),
             random.randint(18, 90),
             fake.phone_number(),
-            doc_id
+            doc_id,
+            "12345"  # Password
         ))
     for p in patients:
         try:
             cur.execute("""
-                INSERT INTO Patients (PatID, Name, Surname, DateOfBirth, Gender, FiscalCode, Age, PhoneNumber, DocID)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Patients (PatID, Name, Surname, DateOfBirth, Gender, FiscalCode, Age, PhoneNumber, DocID, Password)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, p)
         except sqlite3.IntegrityError:
             pass
@@ -69,16 +69,20 @@ def insert_fake_prescriptions(n=10):
     patient_ids = [row[0] for row in cur.fetchall()]
     cur.execute("SELECT DocID FROM Therapist")
     doctor_ids = [row[0] for row in cur.fetchall()]
-    types = ["Medication", "CBT-I", "Melatonin", "Sleep Hygiene"]
+    cur.execute("SELECT TypeID, TypeName FROM PrescriptionTypes")
+    type_map = {row[1]: row[0] for row in cur.fetchall()}
+    types = list(type_map.keys())
     for i in range(n):
         pat_id = random.choice(patient_ids)
         doc_id = random.choice(doctor_ids)
+        type_name = random.choice(types)
+        type_id = type_map[type_name]
         cur.execute("""
-            INSERT INTO Prescriptions (PatID, Type, Content, DocID, PrescrDate)
+            INSERT INTO Prescriptions (PatID, TypeID, Content, DocID, PrescrDate)
             VALUES (?, ?, ?, ?, ?)
         """, (
             pat_id,
-            random.choice(types),
+            type_id,
             fake.sentence(nb_words=8),
             doc_id,
             fake.date_this_decade().strftime("%Y-%m-%d")
@@ -123,26 +127,36 @@ def insert_fake_wearable_devices(n=10):
     conn.commit()
     conn.close()
 
-def insert_fake_sleep_records(n=10):
+def insert_fake_sleep_records(n=100):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT PatID FROM Patients")
     patient_ids = [row[0] for row in cur.fetchall()]
     cur.execute("SELECT ID FROM WearableDevice")
     device_ids = [row[0] for row in cur.fetchall()]
-    for i in range(n):
+    used_keys = set()
+    inserted = 0
+    while inserted < n:
+        date = fake.date_this_year().strftime("%Y-%m-%d")
+        pat_id = random.choice(patient_ids)
+        dev_id = random.choice(device_ids)
+        key = (date, pat_id, dev_id)
+        if key in used_keys:
+            continue
         cur.execute("""
             INSERT INTO SleepRecords (Date, PatID, DevID, Hr, SpO2, MovementIdx, SleepCycles)
             VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
-            fake.date_this_year().strftime("%Y-%m-%d"),
-            random.choice(patient_ids),
-            random.choice(device_ids),
+            date,
+            pat_id,
+            dev_id,
             random.randint(50, 100),
             round(random.uniform(90, 100), 1),
             round(random.uniform(0, 10), 2),
             fake.word()
         ))
+        used_keys.add(key)
+        inserted += 1
     conn.commit()
     conn.close()
 
@@ -254,15 +268,15 @@ def insert_fake_appointment_slots_and_appointments(n=10):
 
 if __name__ == "__main__":
     print("Seeding database with fake data...")
-    insert_fake_therapists(3)
-    insert_fake_patients()
-    insert_fake_prescriptions(20)
-    insert_fake_notes(30)
+    insert_fake_therapists(5)
+    insert_fake_patients(10)
+    insert_fake_prescriptions(100)
+    insert_fake_notes(100)
     insert_fake_wearable_devices()
-    insert_fake_sleep_records()
+    insert_fake_sleep_records(100)
     insert_fake_questionnaires(40)
     insert_fake_questionnaire_answers(50)
-    insert_fake_appointment_slots_and_appointments(20)
+    insert_fake_appointment_slots_and_appointments(30)
     print("Done!")
 
 

@@ -3,28 +3,37 @@ import sqlite3
 from db.connection import get_connection
 from datetime import datetime
 from models.appointment_slot import AppointmentSlot
-from models.appointment import Appointment
+# from models.appointment import Appointment
+# from models.doctor import Doctor
 
-def write_prescription(pat_id, doctor_id, treatm_type, content, conn=None):
+def get_prescription_types():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT TypeID, TypeName FROM PrescriptionTypes")
+    types = cursor.fetchall()
+    conn.close()
+    return types  # List of (TypeID, TypeName)
+
+def write_prescription(pat_id, doctor_id, type_id, content, conn=None):
     if conn is None:
         conn = get_connection()
     cursor = conn.cursor()
     prescr_date = datetime.now().strftime("%Y-%m-%d")
     cursor.execute("""
-        INSERT INTO Prescriptions (PatID, Type, Content, DocID, PrescrDate)
+        INSERT INTO Prescriptions (PatID, TypeID, Content, DocID, PrescrDate)
         VALUES (?, ?, ?, ?, ?)
-    """, (pat_id, treatm_type, content, doctor_id, prescr_date))
+    """, (pat_id, type_id, content, doctor_id, prescr_date))
     conn.commit()
     conn.close()
 
-def update_prescription(prescription_id, treatm_type, content, conn=None):
+def update_prescription(prescription_id, type_id, content, conn=None):
     if conn is None:
         conn = get_connection()
     cursor = conn.cursor()
     prescr_date = datetime.now().strftime("%Y-%m-%d")
     cursor.execute(
-        "UPDATE Prescriptions SET Type = ?, Content = ?, PrescrDate = ? WHERE PrescrID = ?",
-        (treatm_type, content, prescr_date, prescription_id)
+        "UPDATE Prescriptions SET TypeID = ?, Content = ?, PrescrDate = ? WHERE PrescrID = ?",
+        (type_id, content, prescr_date, prescription_id)
     )
     conn.commit()
     conn.close()
@@ -139,3 +148,14 @@ def load_appointments_by_doctor(doc_id, conn=None):
         appointments.append(appointment)
     conn.close()
     return appointments
+
+def get_all_doctors():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT DocID, Surname FROM Therapist")
+    doctors = []
+    for row in cursor.fetchall():
+        # Only need id and surname for mapping
+        doctors.append({"doctor_id": row[0], "surname": row[1]})
+    conn.close()
+    return doctors
