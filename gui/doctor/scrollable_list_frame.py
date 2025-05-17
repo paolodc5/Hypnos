@@ -2,12 +2,16 @@ import customtkinter as ctk
 from gui.doctor.clickable_row_frame import ClickableRowFrame
 
 class ScrollableListFrame(ctk.CTkFrame):
-    def __init__(self, master, items, fields_formatter, detail_formatter, column_titles, **kwargs):
+    def __init__(self, master, items, fields_formatter, detail_formatter, column_titles, select_callback=None, **kwargs):
         super().__init__(master, fg_color="transparent", **kwargs)
         self.items = items
         self.fields_formatter = fields_formatter
         self.detail_formatter = detail_formatter
         self.column_titles = column_titles
+        self.select_callback = select_callback
+        self.selected_row = None
+        self.selected_index = None
+        self.row_widgets = []
 
         self.canvas = ctk.CTkCanvas(
             self, 
@@ -44,19 +48,40 @@ class ScrollableListFrame(ctk.CTkFrame):
                 text_color="#1d4ed8",
                 fg_color="transparent"
             )
-            header.grid(row=0, column=col, sticky="new", padx=(24 if col == 0 else 12, 2), pady=(0, 2))
+            header.grid(row=0, column=col, sticky="ew", padx=(24 if col == 0 else 12, 2), pady=(0, 2))
             self.inner_frame.grid_columnconfigure(col, weight=1)
         # Data rows
+        self.row_widgets.clear()
         for i, item in enumerate(self.items):
             fields = self.fields_formatter(item)
             detail = self.detail_formatter(item)
-            row = ClickableRowFrame(
-                self.inner_frame,
-                fields=fields,
-                detail_callback=lambda d=detail, it=item: self.show_detail_dialog(it, d)
-            )
-            row.grid(row=i+1, column=0, columnspan=len(self.column_titles), sticky="ew", padx=10, pady=4)
-            self.inner_frame.grid_rowconfigure(i+1, weight=0)
+            row_labels = []
+            for col, (label, value, unit) in enumerate(fields):
+                value_label = ctk.CTkLabel(
+                    self.inner_frame,
+                    text=f"{value} {unit}".strip(),
+                    font=("Arial", 13),
+                    text_color="#1e293b",
+                    anchor="w"
+                )
+                value_label.grid(row=i+1, column=col, sticky="ew", padx=(24 if col == 0 else 12, 2), pady=8)
+                value_label.bind("<Button-1>", lambda e, idx=i: self.select_row(idx))
+                row_labels.append(value_label)
+                self.inner_frame.grid_columnconfigure(col, weight=1)
+            self.row_widgets.append(row_labels)
+
+    def select_row(self, idx):
+        # Remove highlight from previous
+        if self.selected_index is not None:
+            for widget in self.row_widgets[self.selected_index]:
+                widget.configure(fg_color="transparent")
+        # Highlight new
+        for widget in self.row_widgets[idx]:
+            widget.configure(fg_color="#bae6fd")
+        self.selected_index = idx
+        self.selected_row = self.items[idx]
+        if self.select_callback:
+            self.select_callback(self.selected_row)
 
     def show_detail_dialog(self, item, details):
         from gui.doctor.detail_dialog import DetailDialog

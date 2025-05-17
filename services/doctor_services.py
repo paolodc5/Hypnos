@@ -5,103 +5,66 @@ from datetime import datetime
 from models.appointment_slot import AppointmentSlot
 from models.appointment import Appointment
 
-# def write_prescription(pat_id, doc_id, treatm_type, content, conn=None):
-#     if conn is None:
-#         conn = get_connection()
-#     cursor = conn.cursor()
+def write_prescription(pat_id, doctor_id, treatm_type, content, conn=None):
+    if conn is None:
+        conn = get_connection()
+    cursor = conn.cursor()
+    prescr_date = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("""
+        INSERT INTO Prescriptions (PatID, Type, Content, DocID, PrescrDate)
+        VALUES (?, ?, ?, ?, ?)
+    """, (pat_id, treatm_type, content, doctor_id, prescr_date))
+    conn.commit()
+    conn.close()
 
-#     prescr_id = f"{pat_id}_{doc_id}_{datetime.now().isoformat()}"
-#     prescr_date = datetime.now().strftime("%Y-%m-%d")
+def update_prescription(prescription_id, treatm_type, content, conn=None):
+    if conn is None:
+        conn = get_connection()
+    cursor = conn.cursor()
+    prescr_date = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute(
+        "UPDATE Prescriptions SET Type = ?, Content = ?, PrescrDate = ? WHERE PrescrID = ?",
+        (treatm_type, content, prescr_date, prescription_id)
+    )
+    conn.commit()
+    conn.close()
 
-#     cursor.execute("""
-#         INSERT INTO Prescriptions (PatID, Type, PrescrID, Content, DocID, PrescrDate)
-#         VALUES (?, ?, ?, ?, ?)
-#     """, (pat_id, treatm_type, prescr_id, content, doc_id, prescr_date))
+def delete_prescription(prescription_id, conn=None):
+    if conn is None:
+        conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM Prescriptions WHERE PrescrID = ?", (prescription_id,))
+    conn.commit()
+    conn.close()
 
-#     conn.commit()
-#     conn.close()
-#     return prescr_id
+def write_note(pat_id, doctor_id, content, conn=None):
+    if conn is None:
+        conn = get_connection()
+    cursor = conn.cursor()
+    date = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("""
+        INSERT INTO Notes (Date, Content, PatID, DocID)
+        VALUES (?, ?, ?, ?)
+    """, (date, content, pat_id, doctor_id))
+    conn.commit()
+    conn.close()
 
+def update_note(note_id, new_content, conn=None):
+    if conn is None:
+        conn = get_connection()
+    cursor = conn.cursor()
+    date = datetime.now().strftime("%Y-%m-%d")
+    cursor.execute("UPDATE Notes SET Content = ?, Date = ? WHERE NoteID = ?", (new_content, date, note_id))
+    conn.commit()
+    conn.close()
 
-# def edit_prescription_db(prescr_id, new_content, conn=None):
-#     if conn is None:
-#         conn = get_connection()
-#     cursor = conn.cursor()
-
-#     cursor.execute("""
-#         UPDATE Prescriptions
-#         SET Content = ?
-#         WHERE PrescrID = ?
-#     """, (new_content, prescr_id))
-
-#     conn.commit()
-#     conn.close()
-
-
-# def view_patient_sleep_records(pat_id, conn=None):
-#     if conn is None:
-#         conn = get_connection()
-#     cursor = conn.cursor()
-
-#     cursor.execute("""
-#         SELECT * FROM SleepRecords
-#         WHERE PatID = ?
-#         ORDER BY Date DESC
-#     """, (pat_id,))
-#     records = cursor.fetchall()
-
-#     conn.close()
-#     return records
-
-
-# def view_patient_questionnaires(pat_id, conn=None):
-#     if conn is None:
-#         conn = get_connection()
-#     cursor = conn.cursor()
-
-#     cursor.execute("""
-#         SELECT * FROM Questionnaires
-#         WHERE PatID = ?
-#         ORDER BY Date DESC
-#     """, (pat_id,))
-#     questionnaires = cursor.fetchall()
-
-#     conn.close()
-#     return questionnaires
-
-
-# def write_note(pat_id, doc_id, content, conn=None):
-#     if conn is None:
-#         conn = get_connection()
-#     cursor = conn.cursor()
-
-#     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-#     cursor.execute("""
-#         INSERT INTO Notes (Date, Content, PatID, DocID)
-#         VALUES (?, ?, ?, ?)
-#     """, (date, content, pat_id, doc_id))
-
-#     conn.commit()
-#     conn.close()
-
-
-# def edit_note_db(note_id, new_content, conn=None):
-#     if conn is None:
-#         conn = get_connection()
-#     cursor = conn.cursor()
-
-#     cursor.execute("""
-#         UPDATE Notes
-#         SET Content = ?
-#         WHERE NoteID = ?
-#     """, (new_content, note_id))
-
-#     conn.commit()
-#     conn.close()
-
-
-
+def delete_note(note_id, conn=None):
+    if conn is None:
+        conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM Notes WHERE NoteID = ?", (note_id,))
+    conn.commit()
+    conn.close()
 
 def load_appointment_slots_by_doctor(doc_id, conn=None):
     if conn is None:
@@ -144,8 +107,6 @@ def load_appointments_by_doctor(doc_id, conn=None):
         ORDER BY ID DESC
     """, (doc_id,))
     appointments = []
-
-
 
     for row in cursor.fetchall():
         # print(f"Processing appointment row: {row}")
