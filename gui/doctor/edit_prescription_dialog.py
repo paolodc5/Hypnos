@@ -19,7 +19,7 @@ class EditPrescriptionDialog(ctk.CTkToplevel):
         self.type_map = {name: tid for tid, name in types}
         self.type_combo = ctk.CTkComboBox(form, values=list(self.type_map.keys()))
         # Set current value
-        current_type = next((name for name, tid in self.type_map.items() if tid == prescription.type_id), "")
+        current_type = next((name for name, tid in self.type_map.items() if tid == prescription.treatm_type), "")
         self.type_combo.set(current_type)
         self.type_combo.grid(row=0, column=1, padx=10, pady=2)
 
