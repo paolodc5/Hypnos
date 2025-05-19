@@ -22,6 +22,7 @@ def create_tables(conn=None):
             FiscalCode TEXT UNIQUE,
             Age INTEGER,
             PhoneNumber TEXT,
+            Email TEXT,
             DocID INTEGER,
             Password TEXT NOT NULL,
             FOREIGN KEY (DocID) REFERENCES Therapist(DocID)

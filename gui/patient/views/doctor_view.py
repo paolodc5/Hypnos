@@ -3,9 +3,12 @@ import customtkinter as ctk
 
 class DoctorView(BaseView):
     def show(self):
-        self.app.clear_content()  # <-- Use self.app.clear_content()
+        self.app.clear_content()
 
-        doctor = self.app.patient.get_doctor()  # Make sure your Patient class has this method
+        doctor = self.app.patient.get_doctor()
+        if not doctor:
+            ctk.CTkLabel(self.app.content_frame, text="No doctor assigned.", font=("Helvetica", 18), text_color="red").pack(pady=40)
+            return
 
         # --- Main card with dark background ---
         card = ctk.CTkFrame(self.app.content_frame, corner_radius=25, fg_color="#1B263B")

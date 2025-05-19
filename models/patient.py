@@ -21,6 +21,7 @@ class Patient:
                  phone_number: str,
                  fiscal_code: str,
                  doctor_id: Optional[int] = None,
+                 email: Optional[str] = None
 
                  ):
         self.patient_id = patient_id
@@ -32,6 +33,7 @@ class Patient:
         self.gender = gender
         self.phone_number = phone_number
         self.fiscal_code = fiscal_code
+        self.email = email  
 
         # Lists to hold the patient's data
         self.questionnaires: List["Questionnaire"] = []
@@ -73,15 +75,36 @@ class Patient:
     def get_questionnaires(self) -> List["Questionnaire"]:
         """Get all questionnaires filled by the patient."""
         return self.questionnaires
-    
 
     def load_prescriptions(self):
         from services.patient_services import get_prescriptions
         self.prescriptions = get_prescriptions(self.patient_id)
 
     def load_notes(self):
-        from services.patient_services import get_notes
-        self.notes = get_notes(self.patient_id)
+        from services.patient_services import get_patient_notes
+        from services.patient_services import get_doctor_notes
+        self.patient_notes = get_patient_notes(self.patient_id)
+        self.doctor_notes = get_doctor_notes(self.patient_id, self.doctor_id)
+
+    def get_doctor_notes(self):
+        from services.patient_services import get_doctor_notes
+        return get_doctor_notes(self.patient_id, self.doctor_id)
+
+    def get_patient_notes(self):
+        from services.patient_services import get_patient_notes
+        return get_patient_notes(self.patient_id)
+
+    def add_note(self, content):
+        from services.patient_services import add_patient_note
+        add_patient_note(self.patient_id, content)
+
+    def update_note(self, note_id, new_content=None, delete=False):
+        from services.patient_services import update_patient_note
+        from services.patient_services import delete_patient_note
+        if delete:
+            delete_patient_note(note_id)
+        else:
+            update_patient_note(note_id, new_content)
 
     def load_sleep_records(self):
         from services.patient_services import get_sleep_records
@@ -89,7 +112,33 @@ class Patient:
 
     def __str__(self):
         return f"Patient({self.patient_id}, {self.name}, {self.email})"
+    
+    def get_doctor(self):
+        from services.patient_services import get_doctor_by_id
+        """Fetch the assigned doctor from the database."""
+        if not self.doctor_id:
+            return None
+        return get_doctor_by_id(self.doctor_id)
+    
+    def save(self):
+        from services.patient_services import update_patient_profile
+        update_patient_profile(
+            self.patient_id,
+            self.name,
+            self.surname,
+            self.birth_date,
+            self.age,
+            self.gender,
+            self.fiscal_code,
+            self.email,
+            self.phone_number
+        )
 
+    def reload_from_db(self):
+        from services.patient_services import get_patient_by_id
+        fresh = get_patient_by_id(self.patient_id)
+        if fresh:
+            self.__dict__.update(fresh.__dict__)
 
 
 

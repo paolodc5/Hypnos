@@ -1,75 +1,90 @@
 from .base_view import BaseView
 import customtkinter as ctk
+import tkinter.simpledialog
 
 class NotesView(BaseView):
     def show(self):
         self.app.clear_content()
 
-        notes = self.app.patient.get_notes()  # List of note objects with .date and .content
+        self.app.patient.load_notes()  # Load notes from the database
+        doctor_notes = self.app.patient.doctor_notes
+        patient_notes = self.app.patient.patient_notes
 
-        # Header
-        header = ctk.CTkLabel(
+        # Doctor's notes section
+        ctk.CTkLabel(
             self.app.content_frame,
-            text="Your Notes",
-            font=("Helvetica", 26, "bold"),
-            text_color="#63B3ED",
-            anchor="w"
-        )
-        header.pack(padx=30, pady=(20, 10), fill="x")
+            text="Doctor's Notes",
+            font=("Helvetica", 22, "bold"),
+            text_color="#63B3ED"
+        ).pack(padx=30, pady=(20, 10), anchor="w")
 
-        # Scrollable container for notes
         notes_scroll = ctk.CTkScrollableFrame(
             self.app.content_frame,
             fg_color="#121927",
             corner_radius=20,
             width=750,
-            height=380,
+            height=180,
             border_width=1,
             border_color="#2A3A60"
         )
         notes_scroll.pack(padx=30, pady=(0, 20), fill="both", expand=True)
 
-        # Sort notes newest first if date is sortable
-        try:
-            notes = sorted(notes, key=lambda n: n.date, reverse=True)
-        except Exception:
-            pass
-
-        for note in notes:
-            # Format date nicely
+        for note in doctor_notes:
             date_str = note.date.strftime("%d %B %Y") if hasattr(note.date, "strftime") else str(note.date)
-
-            card = ctk.CTkFrame(
-                notes_scroll,
-                fg_color="#1B263B",
-                corner_radius=15,
-                border_width=1,
-                border_color="#3A4A78",
-                height=90
-            )
+            card = ctk.CTkFrame(notes_scroll, fg_color="#1B263B", corner_radius=15, border_width=1, border_color="#3A4A78", height=90)
             card.pack(fill="x", pady=8, padx=10)
+            ctk.CTkLabel(card, text=f"{date_str} (Doctor)", font=("Helvetica", 14, "bold"), text_color="#89A9E1", anchor="w").pack(padx=15, pady=(12, 4), fill="x")
+            ctk.CTkLabel(card, text=note.content, font=("Helvetica", 13), text_color="#D1D9F1", wraplength=700, justify="left", anchor="w").pack(padx=15, pady=(0, 12), fill="x")
 
-            # Date title
-            ctk.CTkLabel(
+        # Patient's notes section
+        ctk.CTkLabel(
+            self.app.content_frame,
+            text="Your Notes",
+            font=("Helvetica", 22, "bold"),
+            text_color="#63B3ED"
+        ).pack(padx=30, pady=(10, 10), anchor="w")
+
+        patient_notes_scroll = ctk.CTkScrollableFrame(
+            self.app.content_frame,
+            fg_color="#121927",
+            corner_radius=20,
+            width=750,
+            height=180,
+            border_width=1,
+            border_color="#2A3A60"
+        )
+        patient_notes_scroll.pack(padx=30, pady=(0, 20), fill="both", expand=True)
+
+        for note in patient_notes:
+            date_str = note.date.strftime("%d %B %Y") if hasattr(note.date, "strftime") else str(note.date)
+            card = ctk.CTkFrame(patient_notes_scroll, fg_color="#1B263B", corner_radius=15, border_width=1, border_color="#3A4A78", height=90)
+            card.pack(fill="x", pady=8, padx=10)
+            ctk.CTkLabel(card, text=f"{date_str} (You)", font=("Helvetica", 14, "bold"), text_color="#89A9E1", anchor="w").pack(padx=15, pady=(12, 4), fill="x")
+            ctk.CTkLabel(card, text=note.content, font=("Helvetica", 13), text_color="#D1D9F1", wraplength=700, justify="left", anchor="w").pack(padx=15, pady=(0, 12), fill="x")
+
+            edit_btn = ctk.CTkButton(
                 card,
-                text=f"{date_str} Notes",
-                font=("Helvetica", 14, "bold"),
-                text_color="#89A9E1",
-                anchor="w"
-            ).pack(padx=15, pady=(12, 4), fill="x")
+                text="Edit",
+                width=60,
+                fg_color="#63B3ED",
+                hover_color="#7A8FF7",
+                font=("Helvetica", 12, "bold"),
+                command=lambda n=note: self.edit_note_dialog(n)
+            )
+            edit_btn.pack(side="right", padx=15, pady=10)
 
-            # Note content
-            ctk.CTkLabel(
+            delete_btn = ctk.CTkButton(
                 card,
-                text=note.content,
-                font=("Helvetica", 13),
-                text_color="#D1D9F1",
-                wraplength=700,
-                justify="left",
-                anchor="w"
-            ).pack(padx=15, pady=(0, 12), fill="x")
+                text="Delete",
+                width=60,
+                fg_color="#E57373",
+                hover_color="#FF8A80",
+                font=("Helvetica", 12, "bold"),
+                command=lambda n=note: self.delete_note_confirm(n)
+            )
+            delete_btn.pack(side="right", padx=5, pady=10)
 
-        # Input section below notes
+        # Input section for adding a new note
         input_frame = ctk.CTkFrame(
             self.app.content_frame,
             fg_color="#121927",
@@ -109,3 +124,16 @@ class NotesView(BaseView):
         if content:
             self.app.patient.add_note(content)
             self.show()  # Refresh the notes view
+
+    def edit_note_dialog(self, note):
+        import tkinter.simpledialog
+        new_content = tkinter.simpledialog.askstring("Edit Note", "Modify your note:", initialvalue=note.content, parent=self.app)
+        if new_content is not None and new_content.strip():
+            self.app.patient.update_note(note.note_id, new_content.strip())
+            self.show()  # Refresh notes
+
+    def delete_note_confirm(self, note):
+        import tkinter.messagebox
+        if tkinter.messagebox.askyesno("Delete Note", "Are you sure you want to delete this note?", parent=self.app):
+            self.app.patient.update_note(note.note_id, delete=True)
+            self.show()  # Refresh notes

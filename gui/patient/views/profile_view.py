@@ -30,10 +30,13 @@ class ProfileView(BaseView):
         }
 
         p = self.app.patient
-        ctk.CTkLabel(info_frame, text=f"👤 Name: {p.name} {p.surname}", **label_style).pack(pady=10, anchor="w", padx=20)
-        ctk.CTkLabel(info_frame, text=f"🎂 Birthdate: {p.birth_date}", **label_style).pack(pady=10, anchor="w", padx=20)
-        ctk.CTkLabel(info_frame, text=f"📧 Email: {p.email}", **label_style).pack(pady=10, anchor="w", padx=20)
-        ctk.CTkLabel(info_frame, text=f"📞 Phone: {p.phone_number}", **label_style).pack(pady=10, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"👤 Name: {p.name} {p.surname}", **label_style).pack(pady=5, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"🎂 Birthdate: {p.birth_date}", **label_style).pack(pady=5, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"🔢 Age: {p.age}", **label_style).pack(pady=5, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"⚧ Gender: {p.gender}", **label_style).pack(pady=5, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"🆔 Fiscal Code: {p.fiscal_code}", **label_style).pack(pady=5, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"📧 Email: {p.email}", **label_style).pack(pady=5, anchor="w", padx=20)
+        ctk.CTkLabel(info_frame, text=f"📞 Phone: {p.phone_number}", **label_style).pack(pady=5, anchor="w", padx=20)
 
         # --- Decorative divider ---
         ctk.CTkFrame(card, height=2, fg_color="#63B3ED").pack(fill="x", padx=80, pady=30)
@@ -53,43 +56,19 @@ class ProfileView(BaseView):
         update_button.pack(pady=20)
 
     def show_update_form(self):
-        self.clear_content()
-
-        form_frame = ctk.CTkFrame(self.content_frame, corner_radius=15, fg_color="#f0f4f7")
-        form_frame.pack(pady=50, padx=50, fill="both", expand=True)
-
-        title = ctk.CTkLabel(form_frame, text="Update Profile Information", font=("Arial", 20, "bold"), text_color="#204080")
-        title.pack(pady=(20, 10))
-
-        # Email field
-        email_label = ctk.CTkLabel(form_frame, text="Email:", font=("Arial", 14))
-        email_label.pack(pady=(20, 5))
-        self.email_entry = ctk.CTkEntry(form_frame, width=300)
-        self.email_entry.insert(0, self.patient.email)
-        self.email_entry.pack()
-
-        # Phone field
-        phone_label = ctk.CTkLabel(form_frame, text="Phone Number:", font=("Arial", 14))
-        phone_label.pack(pady=(20, 5))
-        self.phone_entry = ctk.CTkEntry(form_frame, width=300)
-        self.phone_entry.insert(0, self.patient.phone_number)
-        self.phone_entry.pack()
-
-        # Save button
-        save_button = ctk.CTkButton(
-            form_frame, text="Save Changes", fg_color="#3366cc", hover_color="#5588dd",
-            command=self.save_profile_changes
-        )
-        save_button.pack(pady=30)
+        from gui.patient.views.profile_update_dialog import ProfileUpdateDialog
+        ProfileUpdateDialog(self.app, self.app.patient, on_success=self.show)
 
     def save_profile_changes(self):
         new_email = self.email_entry.get()
         new_phone = self.phone_entry.get()
 
-        # Aggiorna l'oggetto e salva (supponiamo ci sia un metodo .save())
-        self.patient.email = new_email
-        self.patient.phone_number = new_phone
-        self.patient.save()  # implementa se non esiste
+        self.app.patient.email = new_email
+        self.app.patient.phone_number = new_phone
+        self.app.patient.save()  # This will update the DB
 
-        # Torna al profilo aggiornato
-        self.load_my_profile()
+        # Optionally reload from DB
+        self.app.patient.reload_from_db()
+
+        # Reload the profile view
+        self.show()

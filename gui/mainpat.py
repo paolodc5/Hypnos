@@ -26,5 +26,5 @@ if __name__ == "__main__":
     )
 
     app = PatientApp(patient)
-    app.geometry("1200x700")
+    app.geometry("1200x800")
     app.mainloop()

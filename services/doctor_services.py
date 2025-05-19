@@ -46,6 +46,29 @@ def delete_prescription(prescription_id, conn=None):
     conn.commit()
     conn.close()
 
+# Get all notes for a patient (both doctor and patient notes)
+def get_notes_for_patient(pat_id, doctor_id=None):
+    from models.note import Note
+    conn = get_connection()
+    cursor = conn.cursor()
+    if doctor_id is not None:
+        cursor.execute("""
+            SELECT NoteID, Date, Content, PatID, DocID
+            FROM Notes
+            WHERE PatID = ? AND (DocID IS NULL OR DocID = ?)
+            ORDER BY Date DESC
+        """, (pat_id, doctor_id))
+    else:
+        cursor.execute("""
+            SELECT NoteID, Date, Content, PatID, DocID
+            FROM Notes
+            WHERE PatID = ?
+            ORDER BY Date DESC
+        """, (pat_id,))
+    notes = [Note(note_id=row[0], date=row[1], content=row[2], patient_id=row[3], doctor_id=row[4]) for row in cursor.fetchall()]
+    conn.close()
+    return notes
+
 def write_note(pat_id, doctor_id, content, conn=None):
     if conn is None:
         conn = get_connection()

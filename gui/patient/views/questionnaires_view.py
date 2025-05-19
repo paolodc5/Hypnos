@@ -1,58 +1,37 @@
 from .base_view import BaseView
 import customtkinter as ctk
+from gui.patient.views.add_isi_dialog import AddISIDialog
+from services.patient_services import get_questionnaires_patient
+
+ISI_QUESTIONS = [
+    "Difficulty falling asleep",
+    "Difficulty staying asleep",
+    "Problem waking up early",
+    "Sleep dissatisfaction",
+    "Interference with daily functioning",
+    "Noticeable by others",
+    "Worry about current sleep"
+]
 
 class QuestionnairesView(BaseView):
     def show(self, selected_day=None):
         self.app.clear_content()
 
-        # Example ISI data for multiple days
-        isi_data = {
-            "2024-05-15": {"total_score": 18, "severity": "Moderate", "responses": [
-                ("Difficulty falling asleep", 3),
-                ("Difficulty staying asleep", 2),
-                ("Problem waking up early", 3),
-                ("Sleep dissatisfaction", 4),
-                ("Interference with daily functioning", 3),
-                ("Noticeable by others", 2),
-                ("Worry about current sleep", 1)
-            ]},
-            "2024-05-16": {"total_score": 20, "severity": "Severe", "responses": [
-                ("Difficulty falling asleep", 4),
-                ("Difficulty staying asleep", 3),
-                ("Problem waking up early", 4),
-                ("Sleep dissatisfaction", 4),
-                ("Interference with daily functioning", 4),
-                ("Noticeable by others", 3),
-                ("Worry about current sleep", 2)
-            ]},
-            "2024-05-17": {"total_score": 15, "severity": "Moderate", "responses": [
-                ("Difficulty falling asleep", 2),
-                ("Difficulty staying asleep", 2),
-                ("Problem waking up early", 3),
-                ("Sleep dissatisfaction", 3),
-                ("Interference with daily functioning", 2),
-                ("Noticeable by others", 2),
-                ("Worry about current sleep", 1)
-            ]},
-            "2024-05-18": {"total_score": 10, "severity": "Mild", "responses": [
-                ("Difficulty falling asleep", 1),
-                ("Difficulty staying asleep", 1),
-                ("Problem waking up early", 1),
-                ("Sleep dissatisfaction", 2),
-                ("Interference with daily functioning", 1),
-                ("Noticeable by others", 1),
-                ("Worry about current sleep", 1)
-            ]},
-            "2024-05-19": {"total_score": 22, "severity": "Severe", "responses": [
-                ("Difficulty falling asleep", 4),
-                ("Difficulty staying asleep", 4),
-                ("Problem waking up early", 4),
-                ("Sleep dissatisfaction", 4),
-                ("Interference with daily functioning", 4),
-                ("Noticeable by others", 3),
-                ("Worry about current sleep", 3)
-            ]}
-        }
+        # Add button to upload today's report
+        add_btn = ctk.CTkButton(
+            self.app.content_frame,
+            text="Add Today's ISI Report",
+            fg_color="#3366CC",
+            hover_color="#5588DD",
+            command=self.open_add_isi_dialog
+        )
+        add_btn.pack(pady=(20, 0))
+
+        # --- Load real ISI data from the database ---
+        isi_data = get_questionnaires_patient(self.app.patient.patient_id)
+        if not isi_data:
+            ctk.CTkLabel(self.app.content_frame, text="No ISI questionnaires submitted yet.", font=("Helvetica", 18), text_color="#F0EDEE").pack(pady=40)
+            return
 
         days = list(isi_data.keys())
         if selected_day is None or selected_day not in isi_data:
@@ -131,6 +110,9 @@ class QuestionnairesView(BaseView):
                     width=120,
                     height=40
                 ).pack(side="left", padx=6)
+
+    def open_add_isi_dialog(self):
+        AddISIDialog(self.app, self.app.patient, on_success=self.show)
 
     def load_questionnaires_for_day(self, selected_day):
         # For now, just reload with selected day (simulate)

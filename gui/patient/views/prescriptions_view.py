@@ -1,74 +1,55 @@
 from .base_view import BaseView
 import customtkinter as ctk
+from services.patient_services import get_prescriptions
 
 class PrescriptionsView(BaseView):
     def show(self):
         self.app.clear_content()
 
-        title = ctk.CTkLabel(self.app.content_frame, text="My Prescriptions", font=("Arial", 24, "bold"))
-        title.grid(row=0, column=0, columnspan=3, pady=20)
+        # Main card/frame for the whole view
+        card = ctk.CTkFrame(self.app.content_frame, corner_radius=25, fg_color="#1B263B")
+        card.pack(pady=40, padx=60, fill="both", expand=True)
 
-        # Category buttons
-        btn_style = {"width": 140, "height": 60, "corner_radius": 20, "font": ("Helvetica", 15, "bold")}
-        ctk.CTkButton(
-            self.app.content_frame, text="Drugs", command=self.show_drugs, **btn_style
-        ).grid(row=1, column=0, padx=40, pady=10)
-        ctk.CTkButton(
-            self.app.content_frame, text="Sleep Habits", command=self.show_sleep_habits, **btn_style
-        ).grid(row=1, column=1, padx=40, pady=10)
-        ctk.CTkButton(
-            self.app.content_frame, text="Examinations", command=self.show_examinations, **btn_style
-        ).grid(row=1, column=2, padx=40, pady=10)
+        title = ctk.CTkLabel(
+            card,
+            text="My Prescriptions",
+            font=("Helvetica", 28, "bold"),
+            text_color="#63B3ED"
+        )
+        title.pack(pady=(30, 10))
 
-    def show_drugs(self):
-        self.app.clear_content()
-        title = ctk.CTkLabel(self.app.content_frame, text="Prescribed Drugs", font=("Arial", 20, "bold"))
-        title.pack(pady=(20, 10))
+        # Fetch all prescriptions once
+        prescriptions = get_prescriptions(self.app.patient.patient_id)
 
-        drugs = [
-            {"name": "Melatonin", "dosage": "3 mg", "instructions": "Take 1 tablet before bedtime"},
-            {"name": "Zolpidem", "dosage": "5 mg", "instructions": "Take 1 tablet 30 minutes before sleep"},
-            {"name": "Valerian Root", "dosage": "500 mg", "instructions": "Take 1 capsule in the evening"},
-        ]
+        # --- Drugs Category ---
+        drugs_frame = ctk.CTkFrame(card, fg_color="#0D1B2A", corner_radius=18)
+        drugs_frame.pack(pady=18, padx=40, fill="x")
+        ctk.CTkLabel(drugs_frame, text="💊 Drugs", font=("Helvetica", 20, "bold"), text_color="#63B3ED").pack(anchor="w", padx=20, pady=(10, 5))
+        drugs = [p for p in prescriptions if p.treatm_type.lower() == "drug"]
+        if not drugs:
+            ctk.CTkLabel(drugs_frame, text="No drugs prescribed.", font=("Helvetica", 14), text_color="#F0EDEE").pack(anchor="w", padx=30, pady=10)
+        else:
+            for drug in drugs:
+                ctk.CTkLabel(drugs_frame, text=f"• {drug.content} (Date: {drug.prescr_date})", font=("Helvetica", 15), text_color="#F0EDEE").pack(anchor="w", padx=30, pady=4)
 
-        for drug in drugs:
-            frame = ctk.CTkFrame(self.app.content_frame)
-            frame.pack(padx=20, pady=10, fill="x")
-            name_label = ctk.CTkLabel(frame, text=f"{drug['name']} - {drug['dosage']}", font=("Arial", 14, "bold"))
-            name_label.pack(anchor="w", padx=10, pady=5)
-            instr_label = ctk.CTkLabel(frame, text=drug["instructions"], font=("Arial", 12))
-            instr_label.pack(anchor="w", padx=10, pady=(0, 5))
+        # --- Sleep Habits Category ---
+        habits_frame = ctk.CTkFrame(card, fg_color="#0D1B2A", corner_radius=18)
+        habits_frame.pack(pady=18, padx=40, fill="x")
+        ctk.CTkLabel(habits_frame, text="🛌 Sleep Habits", font=("Helvetica", 20, "bold"), text_color="#63B3ED").pack(anchor="w", padx=20, pady=(10, 5))
+        habits = [p for p in prescriptions if p.treatm_type.lower() == "sleep habit"]
+        if not habits:
+            ctk.CTkLabel(habits_frame, text="No sleep habits prescribed.", font=("Helvetica", 14), text_color="#F0EDEE").pack(anchor="w", padx=30, pady=10)
+        else:
+            for habit in habits:
+                ctk.CTkLabel(habits_frame, text=f"• {habit.content} (Date: {habit.prescr_date})", font=("Helvetica", 15), text_color="#F0EDEE").pack(anchor="w", padx=30, pady=4)
 
-    def show_sleep_habits(self):
-        self.app.clear_content()
-        title = ctk.CTkLabel(self.app.content_frame, text="Recommended Sleep Habits", font=("Arial", 20, "bold"))
-        title.pack(pady=(20, 10))
-
-        habits = [
-            "Maintain a consistent sleep schedule.",
-            "Avoid caffeine and heavy meals before bedtime.",
-            "Create a restful sleeping environment.",
-            "Limit screen time before sleep.",
-        ]
-
-        for habit in habits:
-            habit_label = ctk.CTkLabel(self.app.content_frame, text=f"• {habit}", font=("Arial", 12))
-            habit_label.pack(anchor="w", padx=20, pady=5)
-
-    def show_examinations(self):
-        self.app.clear_content()
-        title = ctk.CTkLabel(self.app.content_frame, text="Scheduled Examinations", font=("Arial", 20, "bold"))
-        title.pack(pady=(20, 10))
-
-        exams = [
-            {"name": "Polysomnography", "date": "2025-06-10", "location": "Sleep Center A"},
-            {"name": "Home Sleep Test", "date": "2025-06-15", "location": "At Home"},
-        ]
-
-        for exam in exams:
-            frame = ctk.CTkFrame(self.app.content_frame)
-            frame.pack(padx=20, pady=10, fill="x")
-            name_label = ctk.CTkLabel(frame, text=exam["name"], font=("Arial", 14, "bold"))
-            name_label.pack(anchor="w", padx=10, pady=5)
-            details_label = ctk.CTkLabel(frame, text=f"Date: {exam['date']} | Location: {exam['location']}", font=("Arial", 12))
-            details_label.pack(anchor="w", padx=10, pady=(0, 5))
+        # --- Examinations Category ---
+        exams_frame = ctk.CTkFrame(card, fg_color="#0D1B2A", corner_radius=18)
+        exams_frame.pack(pady=18, padx=40, fill="x")
+        ctk.CTkLabel(exams_frame, text="📝 Examinations", font=("Helvetica", 20, "bold"), text_color="#63B3ED").pack(anchor="w", padx=20, pady=(10, 5))
+        exams = [p for p in prescriptions if p.treatm_type.lower() == "examination"]
+        if not exams:
+            ctk.CTkLabel(exams_frame, text="No examinations prescribed.", font=("Helvetica", 14), text_color="#F0EDEE").pack(anchor="w", padx=30, pady=10)
+        else:
+            for exam in exams:
+                ctk.CTkLabel(exams_frame, text=f"• {exam.content} (Date: {exam.prescr_date})", font=("Helvetica", 15), text_color="#F0EDEE").pack(anchor="w", padx=30, pady=4)

@@ -30,27 +30,70 @@ def get_prescriptions(pat_id, conn=None):
     conn.close()
     return prescriptions
 
-def get_notes(pat_id, conn=None):
-    if conn is None:
-        conn = get_connection()
+def get_doctor_notes(patient_id, doctor_id):
+    from db.connection import get_connection
+    from models.note import Note
+    conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT NoteID, PatID, DocID, Content, Date
+        SELECT NoteID, Date, Content, PatID, DocID
         FROM Notes
-        WHERE PatID = ?
+        WHERE PatID = ? AND DocID = ?
         ORDER BY Date DESC
-    """, (pat_id,))
-    notes = []
-    for row in cursor.fetchall():
-        notes.append(Note(
-            note_id=row[0],
-            patient_id=row[1],
-            doctor_id=row[2],
-            content=row[3],
-            date=row[4]
-        ))
+    """, (patient_id, doctor_id))
+    notes = [Note(note_id=row[0], date=row[1], content=row[2], patient_id=row[3], doctor_id=row[4]) for row in cursor.fetchall()]
     conn.close()
     return notes
+
+def get_patient_notes(patient_id):
+    from db.connection import get_connection
+    from models.note import Note
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT NoteID, Date, Content, PatID, DocID
+        FROM Notes
+        WHERE PatID = ? AND DocID IS NULL
+        ORDER BY Date DESC
+    """, (patient_id,))
+    notes = [Note(note_id=row[0], date=row[1], content=row[2], patient_id=row[3], doctor_id=row[4]) for row in cursor.fetchall()]
+    conn.close()
+    return notes
+
+def add_patient_note(patient_id, content):
+    from db.connection import get_connection
+    import datetime
+    conn = get_connection()
+    cursor = conn.cursor()
+    today = datetime.date.today().isoformat()
+    cursor.execute(
+        "INSERT INTO Notes (Date, Content, PatID, DocID) VALUES (?, ?, ?, NULL)",
+        (today, content, patient_id)
+    )
+    conn.commit()
+    conn.close()
+
+def update_patient_note(note_id, new_content):
+    from db.connection import get_connection
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE Notes SET Content = ? WHERE NoteID = ? AND DocID IS NULL",
+        (new_content, note_id)
+    )
+    conn.commit()
+    conn.close()
+
+def delete_patient_note(note_id):
+    from db.connection import get_connection
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "DELETE FROM Notes WHERE NoteID = ? AND DocID IS NULL",
+        (note_id,)
+    )
+    conn.commit()
+    conn.close()
 
 def get_sleep_records(pat_id, conn=None):
     if conn is None:
@@ -122,3 +165,120 @@ def add_patient_to_db(name, surname, age, birth_date, gender, fiscal_code, phone
     """, (name, surname, age, birth_date, gender, fiscal_code, phone_number, doctor_id, password))
     conn.commit()
     conn.close()
+
+def get_doctor_by_id(doctor_id, conn=None):
+    from models.doctor import Doctor
+    if conn is None:
+        from db.connection import get_connection
+        conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DocID, Name, Surname, Specialty, Email, Password
+        FROM Therapist
+        WHERE DocID = ?
+    """, (doctor_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return Doctor(
+            doctor_id=row[0],
+            name=row[1],
+            surname=row[2],
+            specialty=row[3],
+            email=row[4],
+            password=row[5]
+        )
+    return None
+
+def update_patient_profile(patient_id, name, surname, birth_date, age, gender, fiscal_code, email, phone_number):
+    from db.connection import get_connection
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """UPDATE Patients SET Name=?, Surname=?, DateOfBirth=?, Age=?, Gender=?, FiscalCode=?, Email=?, PhoneNumber=? WHERE PatID=?""",
+        (name, surname, birth_date, age, gender, fiscal_code, email, phone_number, patient_id)
+    )
+    conn.commit()
+    conn.close()
+
+def get_patient_by_id(patient_id):
+    from models.patient import Patient
+    from db.connection import get_connection
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT PatID, Name, Surname, DateOfBirth, Age, Gender, PhoneNumber, FiscalCode, DocID, Email FROM Patients WHERE PatID = ?",
+        (patient_id,)
+    )
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return Patient(
+            patient_id=row[0],
+            name=row[1],
+            surname=row[2],
+            birth_date=row[3],
+            age=row[4],
+            gender=row[5],
+            phone_number=row[6],
+            fiscal_code=row[7],
+            doctor_id=row[8],
+            email=row[9]
+        )
+    return None
+
+def get_questionnaires_patient(patient_id):
+    from db.connection import get_connection
+    #Returns a dict: {date: {"total_score": int, "severity": str, "responses": [(question, answer), ...]}}
+    
+    ISI_QUESTIONS = [
+        "Difficulty falling asleep",
+        "Difficulty staying asleep",
+        "Problem waking up early",
+        "Sleep dissatisfaction",
+        "Interference with daily functioning",
+        "Noticeable by others",
+        "Worry about current sleep"
+    ]
+
+    def isi_severity(score):
+        if score <= 7:
+            return "No clinically significant insomnia"
+        elif score <= 14:
+            return "Subthreshold insomnia"
+        elif score <= 21:
+            return "Moderate insomnia"
+        else:
+            return "Severe insomnia"
+
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Get all questionnaires for the patient
+    cursor.execute("""
+        SELECT Date, Score FROM Questionnaires
+        WHERE PatID = ?
+        ORDER BY Date DESC
+    """, (patient_id,))
+    questionnaires = cursor.fetchall()
+
+    result = {}
+    for date, score in questionnaires:
+        # Get all answers for this date
+        cursor.execute("""
+            SELECT Question, Answer FROM QuestionnaireAnswers
+            WHERE PatID = ? AND Date = ?
+            ORDER BY AnswerID ASC
+        """, (patient_id, date))
+        answers = cursor.fetchall()
+        # Ensure answers are in the same order as ISI_QUESTIONS
+        responses = []
+        for q in ISI_QUESTIONS:
+            found = next((int(a[1]) for a in answers if a[0] == q), None)
+            responses.append((q, found if found is not None else 0))
+        result[date] = {
+            "total_score": score,
+            "severity": isi_severity(score),
+            "responses": responses
+        }
+    conn.close()
+    return result

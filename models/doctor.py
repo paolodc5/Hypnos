@@ -40,14 +40,25 @@ class Doctor:
         """View questionnaires filled by a specific patient."""
         return patient.get_questionnaires()
 
-    def write_note(self, patient: "Patient", note: "Note"):
+    def write_note(self, patient_id, content):
         """Write a note for a specific patient."""
-        patient.notes.append(note)
+        from services.doctor_services import write_note
+        write_note(patient_id, self.doctor_id, content)
 
-    def edit_note(self, note: "Note", new_content: str):
+    def edit_note(self, note_id, new_content):
         """Edit an existing note."""
-        note.content = new_content
-        note.last_modified = datetime.now()
+        from services.doctor_services import update_note
+        update_note(note_id, new_content, self.doctor_id)
+
+    def delete_note(self, note_id):
+        """Delete a note."""
+        from services.doctor_services import delete_note
+        delete_note(note_id, self.doctor_id)
+
+    def get_notes_for_patient(self, patient_id):
+        """Get notes for a specific patient."""
+        from services.doctor_services import get_notes_for_patient
+        return get_notes_for_patient(patient_id, self.doctor_id)
 
     def write_prescription(self, patient: "Patient", prescription: "Prescription"):
         """Write a prescription for a specific patient."""
@@ -76,7 +87,6 @@ class Doctor:
     
     def load_patients(self):
         self.patients = get_patients_by_doctor(self.doctor_id)
-
 
     def load_appointment_slots(self):
         self.appointment_slots = load_appointment_slots_by_doctor(self.doctor_id)
