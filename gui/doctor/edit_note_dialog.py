@@ -1,6 +1,8 @@
 import customtkinter as ctk
 from services.doctor_services import update_note
 
+# This class represents a dialog for editing a note.
+
 class EditNoteDialog(ctk.CTkToplevel):
     def __init__(self, master, patient, note):
         super().__init__(master)

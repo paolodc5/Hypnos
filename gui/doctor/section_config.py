@@ -28,7 +28,7 @@ def get_section_config(patient):
         },
         "Notes": {
             "loader": patient.load_notes,
-            "items": lambda: sorted(patient.notes, key=lambda n: n.date, reverse=True),
+            "items": lambda: sorted(patient.doctor_notes, key=lambda n: n.date, reverse=True),
             "title": "📝 Notes",
             "fields_formatter": lambda n: [
                 ("Date", n.date, ""),

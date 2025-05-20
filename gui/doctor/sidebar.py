@@ -31,23 +31,28 @@ class Sidebar(ctk.CTkFrame):
                                             fg_color="#3366cc", hover_color="#204080", font=("Arial", 14, "bold"), width=160)
         self.doctors_button.grid(row=4, column=0, padx=20, pady=8)
 
-        # Spacer (pushes the rest to the bottom)
-        self.grid_rowconfigure(5, weight=1)
+        # Calendar button
+        self.calendar_button = ctk.CTkButton(self, text="Calendar", command=lambda: self.command_callback("calendar"),
+                                             fg_color="#3366cc", hover_color="#204080", font=("Arial", 14, "bold"), width=160)
+        self.calendar_button.grid(row=5, column=0, padx=20, pady=8)
 
-        # Appearance mode (move to row 6)
-        ctk.CTkLabel(self, text="Appearance Mode:", font=("Arial", 12), text_color="#f8fafc").grid(row=6, column=0, padx=20, pady=(10, 0), sticky="w")
+        # Spacer (pushes the rest to the bottom)
+        self.grid_rowconfigure(6, weight=1)
+
+        # Appearance mode (move to row 7)
+        ctk.CTkLabel(self, text="Appearance Mode:", font=("Arial", 12), text_color="#f8fafc").grid(row=7, column=0, padx=20, pady=(10, 0), sticky="w")
         self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self, values=["Light", "Dark", "System"],
                                                             command=self.change_appearance_mode,
                                                             fg_color="#3366cc", button_color="#204080", width=140)
         self.appearance_mode_optionemenu.set("System")
-        self.appearance_mode_optionemenu.grid(row=7, column=0, padx=20, pady=(4, 10), sticky="w")
+        self.appearance_mode_optionemenu.grid(row=8, column=0, padx=20, pady=(4, 10), sticky="w")
 
-        # UI Scaling (move to row 8 and 9)
-        ctk.CTkLabel(self, text="UI Scaling:", font=("Arial", 12), text_color="#f8fafc").grid(row=8, column=0, padx=20, pady=(10, 0), sticky="w")
+        # UI Scaling (move to row 9 and 10)
+        ctk.CTkLabel(self, text="UI Scaling:", font=("Arial", 12), text_color="#f8fafc").grid(row=9, column=0, padx=20, pady=(10, 0), sticky="w")
         self.scaling_optionemenu = ctk.CTkOptionMenu(self, values=["80%", "90%", "100%", "110%", "120%"],
                                                      command=self.change_scaling, fg_color="#3366cc", button_color="#204080", width=140)
         self.scaling_optionemenu.set("100%")
-        self.scaling_optionemenu.grid(row=9, column=0, padx=20, pady=(4, 20), sticky="w")
+        self.scaling_optionemenu.grid(row=10, column=0, padx=20, pady=(4, 20), sticky="w")
 
         self.grid_columnconfigure(0, weight=1)
 

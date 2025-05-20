@@ -98,6 +98,18 @@ def delete_note(note_id, conn=None):
     conn.commit()
     conn.close()
 
+def add_appointment_slot(doctor_id, start_time, conn=None):
+    if conn is None:
+        from db.connection import get_connection
+        conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO AppointmentSlot (DocID, datetime, isBooked) VALUES (?, ?, 0)",
+        (doctor_id, start_time)
+    )
+    conn.commit()
+    conn.close()
+
 def load_appointment_slots_by_doctor(doc_id, conn=None):
     if conn is None:
         conn = get_connection()
@@ -187,3 +199,27 @@ def get_all_doctors():
         })
     conn.close()
     return doctors
+
+def get_doctor_by_id(doctor_id, conn=None):
+    from models.doctor import Doctor
+    if conn is None:
+        from db.connection import get_connection
+        conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT DocID, Name, Surname, Specialty, Email, Password
+        FROM Therapist
+        WHERE DocID = ?
+    """, (doctor_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return Doctor(
+            doctor_id=row[0],
+            name=row[1],
+            surname=row[2],
+            specialty=row[3],
+            email=row[4],
+            password=row[5]
+        )
+    return None
