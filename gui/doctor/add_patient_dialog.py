@@ -12,7 +12,7 @@ class AddPatientDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(self, text="Add New Patient", font=("Arial", 18, "bold")).pack(pady=(18, 10))
 
-        form = ctk.CTkFrame(self, fg_color="#f8fafc", corner_radius=12)
+        form = ctk.CTkFrame(self, fg_color="#1B263B", corner_radius=12)
         form.pack(fill="both", expand=True, padx=16, pady=8)
 
         # Name

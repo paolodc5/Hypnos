@@ -175,10 +175,15 @@ def load_appointments_by_doctor(doc_id, conn=None):
 def get_all_doctors():
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT DocID, Surname FROM Therapist")
+    cursor.execute("SELECT DocID, Name, Surname, Email, Specialty FROM Therapist")
     doctors = []
     for row in cursor.fetchall():
-        # Only need id and surname for mapping
-        doctors.append({"doctor_id": row[0], "surname": row[1]})
+        doctors.append({
+            "doctor_id": row[0],
+            "name": row[1],
+            "surname": row[2],
+            "email": row[3],
+            "specialty": row[4]
+        })
     conn.close()
     return doctors

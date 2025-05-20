@@ -4,6 +4,7 @@ from models.doctor import Doctor
 from gui.doctor.sidebar import Sidebar
 from gui.doctor.home_tab import HomeTab
 from gui.doctor.patient_tab import PatientTab
+from gui.doctor.doctors_list_view import DoctorsListView
 
 class DoctorApp(ctk.CTk):
     def __init__(self, doctor: Doctor):
@@ -41,9 +42,14 @@ class DoctorApp(ctk.CTk):
                 self.show_home()
             case "patients":
                 self.show_patients()
+            case "doctors":
+                self.show_doctors_list()
 
     def show_home(self):
         HomeTab(self.content_frame, self.doctor).pack(fill="both", expand=True)
 
     def show_patients(self):
         PatientTab(self.content_frame, self.doctor).pack(fill="both", expand=True)
+
+    def show_doctors_list(self):
+        DoctorsListView(self.content_frame).pack(fill="both", expand=True)
