@@ -15,7 +15,7 @@ class PatientApp(ctk.CTk):
     def __init__(self, patient: Patient):
         super().__init__()
         self.title("Hypnos - Patient Dashboard")
-        self.geometry("1100x900")
+        self.geometry("1200x900")
         self.patient = patient
 
         self.setup_gui()
