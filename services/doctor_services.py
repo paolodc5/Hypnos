@@ -103,9 +103,18 @@ def add_appointment_slot(doctor_id, start_time, conn=None):
         from db.connection import get_connection
         conn = get_connection()
     cursor = conn.cursor()
+    # Find the last SLOTXXXX id
+    cursor.execute("SELECT ID FROM AppointmentSlot WHERE ID LIKE 'SLOT%' ORDER BY ID DESC LIMIT 1")
+    row = cursor.fetchone()
+    if row and row[0].startswith("SLOT"):
+        last_num = int(row[0][4:])
+        next_num = last_num + 1
+    else:
+        next_num = 1
+    slot_id = f"SLOT{next_num:04d}"
     cursor.execute(
-        "INSERT INTO AppointmentSlot (DocID, datetime, isBooked) VALUES (?, ?, 0)",
-        (doctor_id, start_time)
+        "INSERT INTO AppointmentSlot (ID, DocID, datetime, isBooked) VALUES (?, ?, ?, 0)",
+        (slot_id, doctor_id, start_time)
     )
     conn.commit()
     conn.close()
