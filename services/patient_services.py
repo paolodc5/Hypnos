@@ -5,6 +5,7 @@ from models.patient import Patient
 from models.prescription import Prescription
 from models.note import Note
 from models.sleep_record import SleepRecord
+from models.forum_question import ForumQuestion
 
 def get_prescriptions(pat_id, conn=None):
     if conn is None:
@@ -282,3 +283,24 @@ def get_questionnaires_patient(patient_id):
         }
     conn.close()
     return result
+
+def add_forum_question(question: ForumQuestion, conn=None) -> int:
+    if conn is None:
+        conn = get_connection()
+        close_conn = True
+    else:
+        close_conn = False
+
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO ForumQuestions (UserType, UserID, Request, FillingDate, FillingTime, Taken)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (question.user_type, question.user_id, question.request,
+          question.filling_date, question.filling_time, question.taken))
+    conn.commit()
+    request_id = cursor.lastrowid
+
+    if close_conn:
+        conn.close()
+
+    return request_id

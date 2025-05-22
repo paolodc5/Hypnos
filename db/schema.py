@@ -156,6 +156,21 @@ def create_tables(conn=None):
         );
     """)
 
+    # ForumQuestions table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ForumQuestions (
+            RequestID INTEGER PRIMARY KEY AUTOINCREMENT,
+            UserType TEXT NOT NULL CHECK (UserType IN ('Doctor', 'Patient')),
+            UserID INTEGER,
+            Request TEXT,
+            FillingDate TEXT,
+            FillingTime TEXT,
+            Taken BOOLEAN DEFAULT 0,
+            FOREIGN KEY (UserID) REFERENCES Patients(PatID),
+            FOREIGN KEY (UserID) REFERENCES Therapist(DocID)
+        );
+    """)
+
     conn.commit()
 
 def insert_prescription_types(conn):

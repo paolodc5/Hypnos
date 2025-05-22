@@ -1,5 +1,8 @@
 from .base_view import BaseView
 import customtkinter as ctk
+from models.forum_question import ForumQuestion
+import datetime
+from tkinter import messagebox
 
 class FAQView(BaseView):
     def show(self):
@@ -57,3 +60,66 @@ class FAQView(BaseView):
                 wraplength=800
             )
             a_label.pack(fill="x", padx=60, pady=(0, 10))
+
+        # Add the "Ask Support" button below FAQs
+        ask_button = ctk.CTkButton(
+            self.app.content_frame,
+            text="Ask Support",
+            fg_color="#3366cc",
+            hover_color="#5599ee",
+            width=150,
+            command=self.open_support_popup
+        )
+        ask_button.pack(pady=30)
+
+    def open_support_popup(self):
+        popup = ctk.CTkToplevel(self.app)
+        popup.title("Ask Support")
+        popup.geometry("500x300")
+        popup.grab_set()  # Make modal
+
+        label = ctk.CTkLabel(popup, text="Write your question or issue below:", font=("Helvetica", 16))
+        label.pack(pady=(20, 10), padx=20, anchor="w")
+
+        self.text_input = ctk.CTkTextbox(popup, width=460, height=150)
+        self.text_input.pack(padx=20, pady=10)
+
+        submit_btn = ctk.CTkButton(popup, text="Submit", width=100, command=lambda: self.submit_support_question(popup))
+        submit_btn.pack(pady=15)
+    
+    def submit_support_question(self, popup):
+        content = self.text_input.get("1.0", "end").strip()
+        if not content:
+            messagebox.showwarning("Warning", "Please enter a question before submitting.")
+            return
+
+        # Here you connect to your forum submission method:
+        # For example:
+        # user_type = self.app.current_user_type  # "Patient" or "Doctor" (you decide how to get this)
+        # user_id = self.app.current_user_id
+        # You would create a ForumQuestion instance and submit it to your DB
+
+        # Example user info placeholders, replace with actual logged user info
+        user_type = getattr(self.app, "current_user_type", "Patient")
+        user_id = getattr(self.app, "current_user_id", 1)
+
+        now = datetime.datetime.now()
+        new_question = ForumQuestion(
+            user_type=user_type,
+            user_id=user_id,
+            request_id=None,  # will be assigned by DB
+            request=content,
+            filling_date=now.date().isoformat(), # convert to string like '2024-05-16'
+            filling_time=now.time().strftime("%H:%M:%S"),  # convert to string like '10:00:00'
+            taken=False
+        )
+
+        # Assuming you have an add_forum_question function in your forum services
+        from services import patient_services
+        patient_services.add_forum_question(new_question)
+
+        messagebox.showinfo("Submitted", "Your question has been submitted to support.")
+        popup.destroy()
+
+
+    
