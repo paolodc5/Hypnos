@@ -3,13 +3,21 @@ import customtkinter as ctk
 from models.forum_question import ForumQuestion
 import datetime
 from tkinter import messagebox
+from services import patient_services
+
+# This is a simple FAQ view for the Patient's app.
 
 class FAQView(BaseView):
     def show(self):
         self.app.clear_content()
+        self.app.content_frame.configure(fg_color="#121927")
+
+
+        card = ctk.CTkFrame(self.app.content_frame, corner_radius=25, fg_color="#1B263B")
+        card.pack(padx=30, pady=30, fill="both", expand=True)
 
         title = ctk.CTkLabel(
-            self.app.content_frame,
+            card,
             text="Frequently Asked Questions",
             font=("Helvetica", 26, "bold"),
             text_color="#63B3ED"
@@ -41,7 +49,7 @@ class FAQView(BaseView):
 
         for faq in faqs:
             q_label = ctk.CTkLabel(
-                self.app.content_frame,
+                card,
                 text=f"Q: {faq['question']}",
                 font=("Helvetica", 16, "bold"),
                 text_color="#F0EDEE",
@@ -51,7 +59,7 @@ class FAQView(BaseView):
             q_label.pack(fill="x", padx=40, pady=(15, 0))
 
             a_label = ctk.CTkLabel(
-                self.app.content_frame,
+                card,
                 text=f"A: {faq['answer']}",
                 font=("Helvetica", 15),
                 text_color="#CBD5E0",
@@ -61,9 +69,13 @@ class FAQView(BaseView):
             )
             a_label.pack(fill="x", padx=60, pady=(0, 10))
 
+        # Button frame for nicer layout
+        btn_frame = ctk.CTkFrame(card, fg_color="transparent")
+        btn_frame.pack(pady=20)
+
         # Add the "Ask Support" button below FAQs
         ask_button = ctk.CTkButton(
-            self.app.content_frame,
+            btn_frame,
             text="Ask Support",
             fg_color="#3366cc",
             hover_color="#5599ee",
@@ -115,7 +127,6 @@ class FAQView(BaseView):
         )
 
         # Assuming you have an add_forum_question function in your forum services
-        from services import patient_services
         patient_services.add_forum_question(new_question)
 
         messagebox.showinfo("Submitted", "Your question has been submitted to support.")

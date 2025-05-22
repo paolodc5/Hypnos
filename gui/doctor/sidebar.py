@@ -39,20 +39,25 @@ class Sidebar(ctk.CTkFrame):
         # Spacer (pushes the rest to the bottom)
         self.grid_rowconfigure(6, weight=1)
 
-        # Appearance mode (move to row 7)
-        ctk.CTkLabel(self, text="Appearance Mode:", font=("Arial", 12), text_color="#f8fafc").grid(row=7, column=0, padx=20, pady=(10, 0), sticky="w")
+        # FAQ button
+        self.faq_button = ctk.CTkButton(self, text="FAQ", command=lambda: self.command_callback("faq"),
+                                        fg_color="#3366cc", hover_color="#204080", font=("Arial", 14, "bold"), width=160)
+        self.faq_button.grid(row=7, column=0, padx=20, pady=(0, 8))
+
+        # Appearance mode
+        ctk.CTkLabel(self, text="Appearance Mode:", font=("Arial", 12), text_color="#f8fafc").grid(row=8, column=0, padx=20, pady=(10, 0), sticky="w")
         self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self, values=["Light", "Dark", "System"],
                                                             command=self.change_appearance_mode,
                                                             fg_color="#3366cc", button_color="#204080", width=140)
         self.appearance_mode_optionemenu.set("System")
-        self.appearance_mode_optionemenu.grid(row=8, column=0, padx=20, pady=(4, 10), sticky="w")
+        self.appearance_mode_optionemenu.grid(row=9, column=0, padx=20, pady=(4, 10), sticky="w")
 
-        # UI Scaling (move to row 9 and 10)
-        ctk.CTkLabel(self, text="UI Scaling:", font=("Arial", 12), text_color="#f8fafc").grid(row=9, column=0, padx=20, pady=(10, 0), sticky="w")
+        # UI Scaling
+        ctk.CTkLabel(self, text="UI Scaling:", font=("Arial", 12), text_color="#f8fafc").grid(row=10, column=0, padx=20, pady=(10, 0), sticky="w")
         self.scaling_optionemenu = ctk.CTkOptionMenu(self, values=["80%", "90%", "100%", "110%", "120%"],
                                                      command=self.change_scaling, fg_color="#3366cc", button_color="#204080", width=140)
         self.scaling_optionemenu.set("100%")
-        self.scaling_optionemenu.grid(row=10, column=0, padx=20, pady=(4, 20), sticky="w")
+        self.scaling_optionemenu.grid(row=11, column=0, padx=20, pady=(4, 20), sticky="w")
 
         self.grid_columnconfigure(0, weight=1)
 

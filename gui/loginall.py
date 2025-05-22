@@ -61,12 +61,12 @@ class LoginWindow(ctk.CTk):
         self.message_label.pack(pady=8)
 
         # Register New Patient button
-        self.register_patient_button = ctk.CTkButton(
-            card, text="New Patient?", fg_color="#3366cc", hover_color="#5588dd",
-            text_color="#F0EDEE", width=200, height=30, font=("Arial", 15, "bold"), corner_radius=10,
-            command=self.open_registrationpat
-        )
-        self.register_patient_button.pack(pady=(8, 16))
+#        self.register_patient_button = ctk.CTkButton(
+#            card, text="New Patient?", fg_color="#3366cc", hover_color="#5588dd",
+#            text_color="#F0EDEE", width=200, height=30, font=("Arial", 15, "bold"), corner_radius=10,
+#            command=self.open_registrationpat
+#        )
+#        self.register_patient_button.pack(pady=(8, 16))
 
         # Register New Doctor button
         self.register_doctor_button = ctk.CTkButton(

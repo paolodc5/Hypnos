@@ -6,6 +6,7 @@ from gui.doctor.home_tab import HomeTab
 from gui.doctor.patient_tab import PatientTab
 from gui.doctor.doctors_list_view import DoctorsListView
 from gui.doctor.calendar_view import CalendarView
+from gui.doctor.faq_view import FAQView
 
 class DoctorApp(ctk.CTk):
     def __init__(self, doctor: Doctor):
@@ -47,6 +48,8 @@ class DoctorApp(ctk.CTk):
                 self.show_doctors_list()
             case "calendar":
                 self.show_calendar()
+            case "faq":
+                self.show_faq()
 
     def show_home(self):
         HomeTab(self.content_frame, self.doctor).pack(fill="both", expand=True)
@@ -60,3 +63,7 @@ class DoctorApp(ctk.CTk):
     def show_calendar(self):
         self.clear_content()
         CalendarView(self.content_frame, self.doctor).pack(fill="both", expand=True)
+
+    def show_faq(self):
+        self.clear_content()
+        FAQView(self.content_frame).pack(fill="both", expand=True)
