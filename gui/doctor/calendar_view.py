@@ -23,7 +23,16 @@ class CalendarView(ctk.CTkFrame):
         card.pack(pady=24, padx=40, fill="both", expand=True)
 
         # Calendar widget
-        self.calendar = Calendar(card, selectmode='day', date_pattern='yyyy-mm-dd')
+        self.calendar = Calendar(card, selectmode='day', date_pattern='yyyy-mm-dd',
+            background="#1B263B",          # calendar body bg
+            foreground="#63B3ED",          # text color
+            weekendforeground="#63B3ED",   # weekend text
+            headersforeground="#63B3ED",   # header text
+            bordercolor="#63B3ED",         # border of the calendar
+            font=("Helvetica", 13),        # font inside cells
+            firstweekday="monday"
+        )
+        
         self.calendar.pack(pady=20, padx=30, anchor="n")
 
         # Add Slot button

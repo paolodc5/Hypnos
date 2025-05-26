@@ -69,7 +69,20 @@ class AppointmentView(BaseView):
         ctk.CTkLabel(calendar_frame, text="Select a Date to Book an Appointment", font=("Helvetica", 20, "bold"), text_color="#63B3ED").pack(anchor="w", padx=20, pady=(10, 5))
 
         # Calendar Widget
-        self.calendar = Calendar(calendar_frame, selectmode='day', date_pattern="yyyy-mm-dd")
+        self.calendar = Calendar(
+    calendar_frame,
+    selectmode='day',
+    date_pattern="yyyy-mm-dd",
+    background="#1B263B",          # calendar body bg
+    foreground="#63B3ED",          # text color
+    weekendforeground="#63B3ED",   # weekend text
+    headersforeground="#63B3ED",   # header text
+    bordercolor="#63B3ED",         # border of the calendar
+    font=("Helvetica", 13),        # font inside cells
+    firstweekday="monday"
+)
+
+
         self.calendar.pack(pady=20, padx=30, anchor="n")
 
         # Slots list container
