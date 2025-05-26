@@ -106,6 +106,7 @@ class AppointmentView(BaseView):
         ctk.CTkLabel(header, text="Start", font=("Helvetica", 14, "bold"), width=120, text_color="#63B3ED").pack(side="left", padx=8)
         ctk.CTkLabel(header, text="End", font=("Helvetica", 14, "bold"), width=120, text_color="#63B3ED").pack(side="left", padx=8)
         ctk.CTkLabel(header, text="Available", font=("Helvetica", 14, "bold"), width=80, text_color="#63B3ED").pack(side="left", padx=8)
+        ctk.CTkButton(header, text="ℹ️",font=("Helvetica", 14),width=50, fg_color="#23304a", text_color="#63B3ED", command=self.show_room_legend).pack(side="left", padx=8)
 
         if not slots:
             ctk.CTkLabel(
@@ -171,3 +172,27 @@ class AppointmentView(BaseView):
                 messagebox.showwarning("Warning", "Unable to book this appointment, please try again.")
         except Exception as e:
             messagebox.showerror("Error", str(e))
+
+    def show_room_legend(self):
+        popup = ctk.CTkToplevel()
+        popup.title("Room Number Info")
+        popup.geometry("360x160")
+        popup.configure(fg_color="#1B263B")
+
+        ctk.CTkLabel(
+            popup,
+            text="✖ - Appointment is booked\n✔ - Appointment is available",
+            font=("Helvetica", 14),
+            text_color="#F0EDEE",
+            justify="left",
+            wraplength=320
+        ).pack(padx=20, pady=30)
+
+        ctk.CTkButton(
+            popup,
+            text="Close",
+            command=popup.destroy,
+            fg_color="#63B3ED",
+            hover_color="#7A8FF7",
+            text_color="#121927"
+        ).pack(pady=10)

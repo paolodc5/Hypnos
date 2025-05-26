@@ -64,6 +64,7 @@ class CalendarView(ctk.CTkFrame):
         ctk.CTkLabel(header, text="Start", font=("Helvetica", 14, "bold"), width=120, text_color="#63B3ED").pack(side="left", padx=8)
         ctk.CTkLabel(header, text="End", font=("Helvetica", 14, "bold"), width=120, text_color="#63B3ED").pack(side="left", padx=8)
         ctk.CTkLabel(header, text="Booked", font=("Helvetica", 14, "bold"), width=80, text_color="#63B3ED").pack(side="left", padx=8)
+        ctk.CTkButton(header, text="ℹ️",font=("Helvetica", 14),width=50, fg_color="#23304a", text_color="#63B3ED", command=self.show_room_legend).pack(side="left", padx=8)
         ctk.CTkLabel(header, text="Patient", font=("Helvetica", 14, "bold"), width=180, text_color="#63B3ED").pack(side="left", padx=8)
 
         if not slots:
@@ -98,6 +99,7 @@ class CalendarView(ctk.CTkFrame):
                 ctk.CTkLabel(row, text=start_str, font=("Helvetica", 13), width=120, text_color="#F0EDEE").pack(side="left", padx=8)
                 ctk.CTkLabel(row, text=end_str, font=("Helvetica", 13), width=120, text_color="#F0EDEE").pack(side="left", padx=8)
                 ctk.CTkLabel(row, text=booked, font=("Helvetica", 13, "bold"), width=80, text_color=booked_color).pack(side="left", padx=8)
+                ctk.CTkLabel(row, text=None, width=50, text_color=booked_color).pack(side="left", padx=8)
                 ctk.CTkLabel(row, text=patient_name, font=("Helvetica", 13), width=180, text_color="#F0EDEE").pack(side="left", padx=8)
     
     def open_add_slot_dialog(self):
@@ -111,3 +113,27 @@ class CalendarView(ctk.CTkFrame):
             start_dt = f"{selected_date} {start_time}"
             add_appointment_slot(self.doctor.doctor_id, start_dt)
             self.show_slots_for_selected_date()
+
+    def show_room_legend(self):
+        popup = ctk.CTkToplevel()
+        popup.title("Room Number Info")
+        popup.geometry("360x160")
+        popup.configure(fg_color="#1B263B")
+
+        ctk.CTkLabel(
+            popup,
+            text="✓ means booked slot\n⏳ means available slot",
+            font=("Helvetica", 14),
+            text_color="#F0EDEE",
+            justify="left",
+            wraplength=320
+        ).pack(padx=20, pady=30)
+
+        ctk.CTkButton(
+            popup,
+            text="Close",
+            command=popup.destroy,
+            fg_color="#63B3ED",
+            hover_color="#7A8FF7",
+            text_color="#121927"
+        ).pack(pady=10)
