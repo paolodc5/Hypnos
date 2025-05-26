@@ -42,9 +42,11 @@ class DoctorsListView(ctk.CTkFrame):
                 "text_color": "#F0EDEE"
             }
 
-            # Place labels in column 0
-            ctk.CTkLabel(info_frame, text=f"🩺 Specialty: {doc.get('specialty', '')}", **label_style).grid(row=0, column=0, sticky="w", padx=20, pady=(14, 6))
-            ctk.CTkLabel(info_frame, text=f"📧 Email: {doc.get('email', '')}", **label_style).grid(row=1, column=0, sticky="w", padx=20, pady=(6, 14))
+            # Place labels in column (we can suppose that the room number is the doctor_id)
+            ctk.CTkLabel(info_frame, text=f"🩺 Specialty: {doc.get('specialty', '')}", **label_style).grid(row=0, column=0, sticky="w", padx=20, pady=6)
+            ctk.CTkLabel(info_frame, text=f"📧 Email: {doc.get('email', '')}", **label_style).grid(row=1, column=0, sticky="w", padx=20, pady=6)
+            ctk.CTkLabel(info_frame, text=f"🚪 Room Number: {doc.get('doctor_id', '')}", **label_style).grid(row=2, column=0, sticky="w", padx=20, pady=6)
+
 
             # Contact Button in column 1, vertically centered
             contact_btn = ctk.CTkButton(
@@ -57,7 +59,7 @@ class DoctorsListView(ctk.CTkFrame):
                 width=110,
                 command=lambda: None  # No action for now
             )
-            contact_btn.grid(row=0, column=1, rowspan=2, padx=(20, 24), pady=10, sticky="e")
+            contact_btn.grid(row=0, column=1, rowspan=3, padx=(20, 24), pady=10, sticky="e")
 
             # Make column 0 expand to push the button to the right
             info_frame.grid_columnconfigure(0, weight=1)

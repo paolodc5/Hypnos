@@ -23,11 +23,11 @@ class Sidebar(ctk.CTkFrame):
                                          fg_color="#3366cc", hover_color="#204080", font=("Arial", 14, "bold"), width=160)
         self.home_button.grid(row=2, column=0, padx=20, pady=8)
         
-        self.patient_button = ctk.CTkButton(self, text="Patients", command=lambda: self.command_callback("patients"),
+        self.patient_button = ctk.CTkButton(self, text="My Patients", command=lambda: self.command_callback("patients"),
                                             fg_color="#3366cc", hover_color="#204080", font=("Arial", 14, "bold"), width=160)
         self.patient_button.grid(row=3, column=0, padx=20, pady=8)
 
-        self.doctors_button = ctk.CTkButton(self, text="Doctors List", command=lambda: self.command_callback("doctors"),
+        self.doctors_button = ctk.CTkButton(self, text="My Colleagues", command=lambda: self.command_callback("doctors"),
                                             fg_color="#3366cc", hover_color="#204080", font=("Arial", 14, "bold"), width=160)
         self.doctors_button.grid(row=4, column=0, padx=20, pady=8)
 
@@ -45,6 +45,12 @@ class Sidebar(ctk.CTkFrame):
         self.faq_button.grid(row=7, column=0, padx=20, pady=(0, 8))
 
         # Appearance mode
+        self.faq_button = ctk.CTkOptionMenu(self, values=["Light", "Dark", "System"], command=self.change_appearance_mode,
+                                        fg_color="#3366cc", button_color="#204080", font=("Arial", 14, "bold"), width=160)
+        self.faq_button.grid(row=8, column=0, padx=20, pady=(0, 30))
+
+        """
+        # Appearance mode
         ctk.CTkLabel(self, text="Appearance Mode:", font=("Arial", 12), text_color="#f8fafc").grid(row=8, column=0, padx=20, pady=(10, 0), sticky="w")
         self.appearance_mode_optionemenu = ctk.CTkOptionMenu(self, values=["Light", "Dark", "System"],
                                                             command=self.change_appearance_mode,
@@ -58,7 +64,8 @@ class Sidebar(ctk.CTkFrame):
                                                      command=self.change_scaling, fg_color="#3366cc", button_color="#204080", width=140)
         self.scaling_optionemenu.set("100%")
         self.scaling_optionemenu.grid(row=11, column=0, padx=20, pady=(4, 20), sticky="w")
-
+        """
+        
         self.grid_columnconfigure(0, weight=1)
 
     def change_appearance_mode(self, mode):
