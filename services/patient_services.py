@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timedelta
 
 from db.connection import get_connection
 from models.patient import Patient
@@ -6,6 +7,8 @@ from models.prescription import Prescription
 from models.note import Note
 from models.sleep_record import SleepRecord
 from models.forum_question import ForumQuestion
+from models.appointment_slot import AppointmentSlot
+from models.appointment import Appointment
 
 def get_prescriptions(pat_id, conn=None):
     if conn is None:
@@ -304,3 +307,226 @@ def add_forum_question(question: ForumQuestion, conn=None) -> int:
         conn.close()
 
     return request_id
+
+# Load appointment slots for a specific doctor
+def load_appointment_slots_by_doctor(doc_id, selected_date, conn=None):
+    if conn is None:
+        conn = get_connection()
+    
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT ID, DocID, datetime, isBooked, selected_by_PatID
+        FROM AppointmentSlot
+        WHERE DocID = ? AND DATE(datetime) = ?
+        ORDER BY datetime DESC
+    """, (doc_id, selected_date))
+    
+    slots = []
+    for row in cursor.fetchall():
+        slot = AppointmentSlot(
+            slot_id=row[0],
+            doctor_id=row[1],
+            start_time=row[2],
+            end_time=row[2],  # Assuming start_time and end_time are the same for simplicity
+        )
+        slot.is_booked = row[3]
+        slot.selected_by = row[4]
+        slots.append(slot)
+    conn.close()
+    return slots
+
+def book_appointment(slot_id: str, patient_id: str, confirm: bool = False) -> bool:
+    """
+    Book an appointment by selecting an available slot, then confirm the appointment if requested.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    # Retrieve the slot details
+    cursor.execute("""
+        SELECT ID, DocID, datetime, isBooked, selected_by_PatID
+        FROM AppointmentSlot
+        WHERE ID = ?
+    """, (slot_id,))
+    row = cursor.fetchone()
+
+    if not row:
+        conn.close()
+        raise ValueError("Slot not found")
+
+    # Create an AppointmentSlot instance
+    slot = AppointmentSlot(
+        slot_id=row[0],
+        doctor_id=row[1],
+        start_time=row[2],  # Make sure this is converted to datetime
+        end_time=row[2],  # Calculate end_time from start_time or set accordingly
+    )
+    slot.is_booked = bool(row[3])
+    slot.selected_by = row[4] if row[3] else None
+
+    # Check if the slot is already booked
+    if slot.is_booked:
+        # If the slot is booked but this patient has selected it, confirm the appointment
+        if slot.selected_by == patient_id:
+            if confirm:
+                # Confirm the appointment if the flag is True
+                cursor.execute("""
+                    UPDATE AppointmentSlot
+                    SET isBooked = 1
+                    WHERE ID = ?
+                """, (slot_id,))
+                # Insert the appointment into the Appointment table
+                cursor.execute("""
+                    INSERT INTO Appointment (SlotID, DocID, PatID, Status)
+                    VALUES (?, ?, ?, ?)
+                """, (slot_id, slot.doctor_id, patient_id, "Confirmed"))
+                conn.commit()
+                conn.close()
+                return True
+            else:
+                # Slot is selected but not confirmed
+                raise ValueError("Slot already selected by this patient, but not confirmed yet.")
+        else:
+            # Slot is already booked by another patient
+            conn.close()
+            raise ValueError("Slot is already booked by another patient.")
+    else:
+        # If the slot is not booked, allow the patient to select it
+        slot.select_slot(patient_id)
+        # Update the slot selection in the database
+        cursor.execute("""
+            UPDATE AppointmentSlot
+            SET isBooked = 1, selected_by_PatID = ?
+            WHERE ID = ?
+        """, (patient_id, slot_id))
+        conn.commit()
+        conn.close()
+        return True
+
+def get_appointments_by_patient(patient_id, conn=None):
+    """
+    Fetch all appointments for a specific patient along with their appointment slot data.
+    """
+    if conn is None:
+        conn = get_connection()
+        close_conn = True
+    else:
+        close_conn = False
+
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT ID, SlotID, DocID, PatID, Status, Notes
+        FROM Appointment
+        WHERE PatID = ?
+        ORDER BY ID DESC
+    """, (patient_id,))
+    
+    rows = cursor.fetchall()
+    appointments = []
+    
+    for row in rows:
+        # Create an Appointment object
+        appointment = Appointment(
+            appointment_id=row[0],
+            doctor_id=row[2],  # DocID
+            patient_id=row[3],  # PatID
+            status=row[4],  # Status (confirmed, pending, or canceled)
+            notes=row[5]  # Notes
+        )
+
+        # Fetch the AppointmentSlot data using the SlotID from the row
+        cursor.execute("""
+            SELECT ID, DocID, datetime, isBooked, selected_by_PatID
+            FROM AppointmentSlot
+            WHERE ID = ?
+        """, (row[1],))  # row[1] is the SlotID
+        
+        slot_row = cursor.fetchone()
+        
+        # If slot exists, assign it to the appointment
+        if slot_row:
+            # Convert the 'datetime' field into a datetime object
+            start_time = datetime.strptime(slot_row[2], "%Y-%m-%d %H:%M")  # Assuming 'datetime' is stored as 'YYYY-MM-DD HH:MM'
+            
+            # Assuming the end time is also stored as a string in the same format, we convert it too
+            # If end_time is not available, you might want to calculate it based on the start_time and a fixed duration
+            end_time = start_time + timedelta(hours=1)  # Example of adding 1 hour for the appointment duration
+            
+            slot = AppointmentSlot(
+                slot_id=slot_row[0],
+                doctor_id=slot_row[1],
+                start_time=start_time,  # start_time as a datetime object
+                end_time=end_time,  # end_time as a datetime object
+            )
+            appointment.slot = slot  # Add slot to appointment
+        
+        # Add the appointment to the list
+        appointments.append(appointment)
+
+    if close_conn:
+        conn.close()
+
+    return appointments
+
+def get_appointmentslot_by_patient(patient_id, conn=None):
+    """
+    Fetch all appointment slots for a specific patient.
+    """
+    if conn is None:
+        conn = get_connection()
+        close_conn = True
+    else:
+        close_conn = False
+
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT ID, DocID, datetime, isBooked, selected_by_PatID
+        FROM AppointmentSlot
+        WHERE selected_by_PatID = ?
+        ORDER BY datetime DESC
+    """, (patient_id,))
+    
+    rows = cursor.fetchall()
+    slots = []
+    
+    for row in rows:
+        slot = AppointmentSlot(
+            slot_id=row[0],
+            doctor_id=row[1],
+            start_time=datetime.strptime(row[2], "%Y-%m-%d %H:%M"),  # Convert to datetime object
+            end_time=datetime.strptime(row[2], "%Y-%m-%d %H:%M") + timedelta(hours=1),  # Assuming 1 hour duration
+        )
+        slot.is_booked = row[3]
+        slot.selected_by = row[4]
+        slots.append(slot)
+
+    if close_conn:
+        conn.close()
+
+    return slots
+
+def get_doctor_name(doctor_id, conn=None):
+    """
+    Fetch the doctor's name from the database using doctor_id.
+    """
+    if conn is None:
+        conn = get_connection()
+        close_conn = True
+    else:
+        close_conn = False
+
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT Surname
+        FROM Therapist
+        WHERE DocID = ?
+    """, (doctor_id,))
+
+    row = cursor.fetchone()
+    doctor_name = row[0] if row else "Unknown Doctor"
+
+    if close_conn:
+        conn.close()
+
+    return doctor_name
+

@@ -121,6 +121,7 @@ def add_appointment_slot(doctor_id, start_time, conn=None):
     conn.commit()
     conn.close()
 
+# Load appointment slots for a specific doctor
 def load_appointment_slots_by_doctor(doc_id, conn=None):
     if conn is None:
         conn = get_connection()
@@ -145,6 +146,8 @@ def load_appointment_slots_by_doctor(doc_id, conn=None):
     conn.close()
     return slots
 
+
+# Load appointments for a specific doctor
 def load_appointments_by_doctor(doc_id, conn=None):
     from models.appointment_slot import AppointmentSlot  # Avoid circular import
     from models.appointment import Appointment

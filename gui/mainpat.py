@@ -1,7 +1,7 @@
 # gui/main.py
 import customtkinter as ctk
-from gui.loginpat import LoginWindow
 from gui.patient.patient_app import PatientApp
+from gui.loginall import LoginWindow
 from models.patient import Patient
 from services.patient_services import get_patient_by_id
 

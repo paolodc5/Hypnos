@@ -10,6 +10,7 @@ from gui.patient.views.sleep_records_view import SleepRecordsView
 from gui.patient.views.questionnaires_view import QuestionnairesView
 from gui.patient.views.notes_view import NotesView
 from gui.patient.views.faq_view import FAQView
+from gui.patient.views.appointments_view import AppointmentView
 
 class PatientApp(ctk.CTk):
     def __init__(self, patient: Patient):
@@ -29,6 +30,7 @@ class PatientApp(ctk.CTk):
         self.questionnaires_view = QuestionnairesView(self)
         self.notes_view = NotesView(self)
         self.faq_view = FAQView(self)
+        self.appointments_view = AppointmentView(self)
 
         self.show_home()
 
@@ -66,6 +68,7 @@ class PatientApp(ctk.CTk):
         ctk.CTkButton(self.sidebar, text="My Profile", command=self.show_profile, **button_style).pack(pady=8)
         ctk.CTkButton(self.sidebar, text="Prescriptions", command=self.show_prescriptions, **button_style).pack(pady=8)
         ctk.CTkButton(self.sidebar, text="Doctor", command=self.show_doctor_profile, **button_style).pack(pady=8)
+        ctk.CTkButton(self.sidebar, text="Appointments", command=self.show_appointments, **button_style).pack(pady=8)
         ctk.CTkButton(self.sidebar, text="Sleep Records", command=self.show_sleep_records, **button_style).pack(pady=8)
         ctk.CTkButton(self.sidebar, text="Questionnaires", command=self.show_questionnaires, **button_style).pack(pady=8)
         ctk.CTkButton(self.sidebar, text="Notes", command=self.show_notes, **button_style).pack(pady=8)
@@ -97,6 +100,8 @@ class PatientApp(ctk.CTk):
         self.prescriptions_view.show()
     def show_doctor_profile(self):
         self.doctor_view.show()
+    def show_appointments(self):
+        self.appointments_view.show()
     def show_sleep_records(self):
         self.sleep_records_view.show()
     def show_questionnaires(self):
