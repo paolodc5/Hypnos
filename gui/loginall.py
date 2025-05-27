@@ -108,8 +108,8 @@ class LoginWindow(ctk.CTk):
             else:
                 self.message_label.configure(text="Invalid patient credentials", text_color="#ef4444")
 
-    def open_registrationpat(self):
-        AddPatientDialog(self)
+    # def open_registrationpat(self):
+    #     AddPatientDialog(self)
 
     def open_registrationdoc(self):
         AddDoctorDialog(self)
