@@ -179,11 +179,16 @@ def insert_fake_sleep_records(n=100):
         deep_sleep = round(random.uniform(60, 120), 1)  # minutes
         light_sleep = round(random.uniform(120, 240), 1)
         rem_sleep = round(random.uniform(60, 120), 1)
+        # Latency: healthy avg ~15min, insomnia avg ~30-60min, randomize with a bias
+        if random.random() < 0.7:
+            latency = max(2, random.gauss(15, 5))  # healthy
+        else:
+            latency = max(5, random.gauss(35, 15))  # insomnia
         cur.execute("""
             INSERT INTO SleepRecords (
                 Date, PatID, DevID, Hr, SpO2, MovementIdx, SleepCycles,
-                Duration, DeepSleepTime, LightSleepTime, REMTime
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                Duration, DeepSleepTime, LightSleepTime, REMTime, Latency
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             date,
             pat_id,
@@ -195,7 +200,8 @@ def insert_fake_sleep_records(n=100):
             duration,
             deep_sleep,
             light_sleep,
-            rem_sleep
+            rem_sleep,
+            round(latency, 1)
         ))
         used_keys.add(key)
         inserted += 1

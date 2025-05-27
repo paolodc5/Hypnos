@@ -105,7 +105,7 @@ def get_sleep_records(pat_id, conn=None):
     cursor = conn.cursor()
     cursor.execute("""
         SELECT Date, PatID, DevID, Hr, SpO2, MovementIdx, SleepCycles,
-               Duration, DeepSleepTime, LightSleepTime, REMTime
+               Duration, DeepSleepTime, LightSleepTime, REMTime, Latency
         FROM SleepRecords
         WHERE PatID = ?
         ORDER BY Date DESC
@@ -123,10 +123,37 @@ def get_sleep_records(pat_id, conn=None):
             duration=row[7],
             deep_sleep_time=row[8],
             light_sleep_time=row[9],
-            REM_time=row[10]
+            REM_time=row[10],
+            latency=row[11] if len(row) > 11 else 0.0
         ))
     conn.close()
     return records
+
+def add_sleep_record(record: SleepRecord, conn=None):
+    if conn is None:
+        conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO SleepRecords (
+            Date, PatID, DevID, Hr, SpO2, MovementIdx, SleepCycles,
+            Duration, DeepSleepTime, LightSleepTime, REMTime, Latency
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        record.date,
+        record.patient_id,
+        record.device_id,
+        record.hr,
+        record.spo2,
+        record.movement_idx,
+        record.sleep_cycles,
+        record.duration,
+        record.deep_sleep_time,
+        record.light_sleep_time,
+        record.REM_time,
+        record.latency
+    ))
+    conn.commit()
+    conn.close()
 
 def get_patients_by_doctor(doc_id: int):
     conn = get_connection()

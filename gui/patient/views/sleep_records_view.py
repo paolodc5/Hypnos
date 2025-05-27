@@ -28,7 +28,7 @@ class SleepRecordsView(BaseView):
                 "efficiency": f"{getattr(rec, 'efficiency', 0):.0f}%",
                 "hr_during_sleep": f"{rec.hr} bpm",
                 "Sleep_Score": getattr(rec, "quality_score", 0),
-                "latency": f"{getattr(rec, 'latency', 0)} min",
+                "latency": f"{round(getattr(rec, 'latency', 0))} min",
                 "rem_phase": format_minutes(rec.REM_time),
                 "deep_phase": format_minutes(rec.deep_sleep_time),
                 "light_phase": format_minutes(rec.light_sleep_time),
@@ -109,7 +109,7 @@ class SleepRecordsView(BaseView):
 
         score = record.get("Sleep_Score", 0)
         ctk.CTkLabel(score_container, text="Sleep Score", font=("Helvetica", 22, "bold"), text_color="#63B3ED").pack(side="left", anchor="w")
-        ctk.CTkLabel(score_container, text=str(score), font=("Helvetica", 22, "bold"), text_color="#F0EDEE").pack(side="right", anchor="e")
+        ctk.CTkLabel(score_container, text=str(round(score)), font=("Helvetica", 22, "bold"), text_color="#F0EDEE").pack(side="right", anchor="e")
 
         progress_container = ctk.CTkFrame(widget_score, fg_color="transparent")
         progress_container.pack(fill="x", padx=20, pady=(10, 20))
