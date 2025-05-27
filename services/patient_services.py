@@ -104,7 +104,8 @@ def get_sleep_records(pat_id, conn=None):
         conn = get_connection()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT Date, PatID, DevID, Hr, SpO2, MovementIdx, SleepCycles
+        SELECT Date, PatID, DevID, Hr, SpO2, MovementIdx, SleepCycles,
+               Duration, DeepSleepTime, LightSleepTime, REMTime
         FROM SleepRecords
         WHERE PatID = ?
         ORDER BY Date DESC
@@ -118,7 +119,11 @@ def get_sleep_records(pat_id, conn=None):
             hr=row[3],
             spo2=row[4],
             movement_idx=row[5],
-            sleep_cycles=row[6]
+            sleep_cycles=row[6],
+            duration=row[7],
+            deep_sleep_time=row[8],
+            light_sleep_time=row[9],
+            REM_time=row[10]
         ))
     conn.close()
     return records

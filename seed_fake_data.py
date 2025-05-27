@@ -10,6 +10,10 @@ fake = Faker()
 def insert_fake_therapists(n=10):
     conn = get_connection()
     cur = conn.cursor()
+    specialties = [
+        "Neurologist", "Psychiatrist", "Pulmonologist", "General Practitioner",
+        "Sleep Medicine Specialist", "Endocrinologist", "Cardiologist", "Otolaryngologist"
+    ]
     therapists = []
     for i in range(n):
         therapists.append((
@@ -17,8 +21,8 @@ def insert_fake_therapists(n=10):
             fake.first_name(),
             fake.last_name(),
             fake.unique.email(),
-            fake.job(),
-            "12345"  # Password is always 12345
+            random.choice(specialties),
+            "12345"
         ))
     for t in therapists:
         try:
@@ -71,19 +75,37 @@ def insert_fake_prescriptions(n=10):
     doctor_ids = [row[0] for row in cur.fetchall()]
     cur.execute("SELECT TypeID, TypeName FROM PrescriptionTypes")
     type_map = {row[1]: row[0] for row in cur.fetchall()}
+    prescription_examples = {
+        "drug": [
+            "Melatonin 3mg, 1 tablet before bedtime",
+            "Zolpidem 10mg, take one at night as needed",
+            "Trazodone 50mg, half tablet at bedtime"
+        ],
+        "remedies": [
+            "Practice sleep hygiene: regular bedtime, no screens 1h before sleep",
+            "Use blackout curtains and keep the room cool",
+            "Try relaxation techniques before bed"
+        ],
+        "visits": [
+            "Schedule a follow-up sleep study in 3 months",
+            "Refer to ENT for evaluation of snoring",
+            "Book a consultation with a psychologist"
+        ]
+    }
     types = list(type_map.keys())
     for i in range(n):
         pat_id = random.choice(patient_ids)
         doc_id = random.choice(doctor_ids)
         type_name = random.choice(types)
         type_id = type_map[type_name]
+        content = random.choice(prescription_examples[type_name])
         cur.execute("""
             INSERT INTO Prescriptions (PatID, TypeID, Content, DocID, PrescrDate)
             VALUES (?, ?, ?, ?, ?)
         """, (
             pat_id,
             type_id,
-            fake.sentence(nb_words=8),
+            content,
             doc_id,
             fake.date_this_decade().strftime("%Y-%m-%d")
         ))
@@ -97,13 +119,23 @@ def insert_fake_notes(n=10):
     patient_ids = [row[0] for row in cur.fetchall()]
     cur.execute("SELECT DocID FROM Therapist")
     doctor_ids = [row[0] for row in cur.fetchall()]
+    note_examples = [
+        "Patient reports difficulty falling asleep, recommends sleep hygiene.",
+        "Observed improvement in sleep duration since last visit.",
+        "Patient complains of frequent awakenings, consider sleep study.",
+        "Discussed possible side effects of medication.",
+        "Patient denies nightmares, but reports daytime fatigue.",
+        "Follow-up in two weeks to assess response to therapy.",
+        "Patient started melatonin, no adverse effects reported.",
+        "Encouraged patient to maintain a sleep diary."
+    ]
     for i in range(n):
         cur.execute("""
             INSERT INTO Notes (Date, Content, PatID, DocID)
             VALUES (?, ?, ?, ?)
         """, (
             fake.date_this_year().strftime("%Y-%m-%d"),
-            fake.text(max_nb_chars=50),
+            random.choice(note_examples),
             random.choice(patient_ids),
             random.choice(doctor_ids)
         ))
@@ -143,9 +175,15 @@ def insert_fake_sleep_records(n=100):
         key = (date, pat_id, dev_id)
         if key in used_keys:
             continue
+        duration = random.randint(360, 540)  # minutes (6h to 9h)
+        deep_sleep = round(random.uniform(60, 120), 1)  # minutes
+        light_sleep = round(random.uniform(120, 240), 1)
+        rem_sleep = round(random.uniform(60, 120), 1)
         cur.execute("""
-            INSERT INTO SleepRecords (Date, PatID, DevID, Hr, SpO2, MovementIdx, SleepCycles)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO SleepRecords (
+                Date, PatID, DevID, Hr, SpO2, MovementIdx, SleepCycles,
+                Duration, DeepSleepTime, LightSleepTime, REMTime
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             date,
             pat_id,
@@ -153,7 +191,11 @@ def insert_fake_sleep_records(n=100):
             random.randint(50, 100),
             round(random.uniform(90, 100), 1),
             round(random.uniform(0, 10), 2),
-            fake.word()
+            str(random.randint(3, 6)),
+            duration,
+            deep_sleep,
+            light_sleep,
+            rem_sleep
         ))
         used_keys.add(key)
         inserted += 1

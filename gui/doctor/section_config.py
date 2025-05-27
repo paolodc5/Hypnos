@@ -1,3 +1,8 @@
+def format_minutes(minutes):
+    hours = int(minutes) // 60
+    mins = int(minutes) % 60
+    return f"{hours}h {mins:02d}m"
+
 def get_section_config(patient):
     # You need a mapping from doctor_id to surname for display
     # Let's assume patient.doctor_map is {doctor_id: surname}
@@ -14,8 +19,15 @@ def get_section_config(patient):
                 ("SpO₂", r.spo2, "%"),
                 ("MovIdx", r.movement_idx, ""),
                 ("Cycles", r.sleep_cycles, ""),
+                ("Duration", format_minutes(r.duration), ""),
+                ("Deep", format_minutes(r.deep_sleep_time), ""),
+                ("Light", format_minutes(r.light_sleep_time), ""),
+                ("REM", format_minutes(r.REM_time), ""),
             ],
-            "column_titles": ["Date", "HR", "SpO₂", "MovIdx", "Cycles"],
+            "column_titles": [
+                "Date", "HR", "SpO₂", "MovIdx", "Cycles",
+                "Duration", "Deep", "Light", "REM"
+            ],
             "detail_formatter": lambda r: (
                 f"Date: {r.date}\n"
                 f"Device ID: {r.device_id}\n"
@@ -23,6 +35,10 @@ def get_section_config(patient):
                 f"SpO₂: {r.spo2} %\n"
                 f"Movement Index: {r.movement_idx}\n"
                 f"Cycles: {r.sleep_cycles}\n"
+                f"Duration: {format_minutes(r.duration)}\n"
+                f"Deep Sleep: {format_minutes(r.deep_sleep_time)}\n"
+                f"Light Sleep: {format_minutes(r.light_sleep_time)}\n"
+                f"REM: {format_minutes(r.REM_time)}\n"
                 f"Patient ID: {r.patient_id}"
             )
         },

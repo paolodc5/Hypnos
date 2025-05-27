@@ -97,6 +97,10 @@ def create_tables(conn=None):
             SpO2 REAL,
             MovementIdx REAL,
             SleepCycles TEXT,
+            Duration INTEGER,
+            DeepSleepTime REAL,
+            LightSleepTime REAL,
+            REMTime REAL,
             PRIMARY KEY (Date, PatID, DevID),
             FOREIGN KEY (PatID) REFERENCES Patients(PatID),
             FOREIGN KEY (DevID) REFERENCES WearableDevice(ID)

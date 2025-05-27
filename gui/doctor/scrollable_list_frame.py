@@ -66,6 +66,7 @@ class ScrollableListFrame(ctk.CTkFrame):
                 )
                 value_label.grid(row=i+1, column=col, sticky="ew", padx=(24 if col == 0 else 12, 2), pady=8)
                 value_label.bind("<Button-1>", lambda e, idx=i: self.select_row(idx))
+                value_label.bind("<Double-Button-1>", lambda e, item=item: self.on_row_click(item))
                 row_labels.append(value_label)
                 self.inner_frame.grid_columnconfigure(col, weight=1)
             self.row_widgets.append(row_labels)
@@ -82,6 +83,11 @@ class ScrollableListFrame(ctk.CTkFrame):
         self.selected_row = self.items[idx]
         if self.select_callback:
             self.select_callback(self.selected_row)
+
+    def on_row_click(self, item):
+        if self.select_callback:
+            details = self.detail_formatter(item)
+            self.show_detail_dialog(item, details)
 
     def show_detail_dialog(self, item, details):
         from gui.doctor.detail_dialog import DetailDialog

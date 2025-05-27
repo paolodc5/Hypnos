@@ -2,7 +2,8 @@ import customtkinter as ctk
 from gui.doctor.scrollable_list_frame import ScrollableListFrame
 from gui.doctor.add_prescription_dialog import AddPrescriptionDialog
 from gui.doctor.add_note_dialog import AddNoteDialog
-from gui.doctor.section_config import get_section_config
+from gui.doctor.section_config import get_section_config, format_minutes
+import datetime
 
 class AdministrationFrame(ctk.CTkFrame):
     def __init__(self, master, patient=None):
@@ -50,7 +51,7 @@ class AdministrationFrame(ctk.CTkFrame):
 
     def show_section(self, section):
         self.current_section = section
-        self.selected_item = None  # Reset selection
+        self.selected_item = None
         for widget in self.content_frame.winfo_children():
             widget.destroy()
         for widget in self.action_frame.winfo_children():
@@ -69,9 +70,12 @@ class AdministrationFrame(ctk.CTkFrame):
         section_conf["loader"]()
         items = section_conf["items"]()
 
+        # --- Make sleep records clickable ---
         def on_select(item):
-            self.selected_item = item
-            self.update_action_buttons(section)
+            from gui.doctor.detail_dialog import DetailDialog
+            details = section_conf["detail_formatter"](item)
+            title = f"Sleep Record {item.date}" if section == "Sleep" else "Details"
+            DetailDialog(self, title, details)
 
         ScrollableListFrame(
             self.content_frame,
@@ -81,6 +85,43 @@ class AdministrationFrame(ctk.CTkFrame):
             column_titles=section_conf["column_titles"],
             select_callback=on_select
         ).pack(fill="both", expand=True, padx=10, pady=10)
+
+        # --- Show means in the right frame for Sleep section ---
+        if section == "Sleep" and items:
+            import datetime
+            now = datetime.datetime.now()
+            three_weeks_ago = now - datetime.timedelta(days=21)
+            recent = [
+                r for r in items
+                if datetime.datetime.strptime(r.date, "%Y-%m-%d") >= three_weeks_ago
+            ]
+            if recent:
+                mean_duration = sum(r.duration for r in recent) / len(recent)
+                mean_cycles = sum(float(r.sleep_cycles) for r in recent) / len(recent)
+                mean_deep = sum(r.deep_sleep_time for r in recent) / len(recent)
+                mean_light = sum(r.light_sleep_time for r in recent) / len(recent)
+                mean_rem = sum(r.REM_time for r in recent) / len(recent)
+                # Compute mean sleep score
+                scores = []
+                for r in recent:
+                    r.compute_sleep_score()
+                    if hasattr(r, "quality_score"):
+                        scores.append(r.quality_score)
+                mean_score = sum(scores) / len(scores) if scores else 0
+
+                from gui.doctor.section_config import format_minutes
+                ctk.CTkLabel(self.action_frame, text="Averages (Last 3 Weeks)", font=("Arial", 16, "bold"), text_color="#1e3a8a").pack(pady=(10, 8))
+                for label, value in [
+                    ("Duration", format_minutes(mean_duration)),
+                    ("Cycles", f"{mean_cycles:.2f}"),
+                    ("Deep", format_minutes(mean_deep)),
+                    ("Light", format_minutes(mean_light)),
+                    ("REM", format_minutes(mean_rem)),
+                    ("Sleep Score", f"{mean_score:.1f}"),
+                ]:
+                    ctk.CTkLabel(self.action_frame, text=f"{label}: {value}", font=("Arial", 14), text_color="#1e293b").pack(anchor="w", padx=18, pady=2)
+            else:
+                ctk.CTkLabel(self.action_frame, text="No sleep data in last 3 weeks.", font=("Arial", 13, "italic"), text_color="gray").pack(pady=20)
 
         self.update_action_buttons(section)
 

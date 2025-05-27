@@ -5,7 +5,7 @@ import os
 from gui.doctor.doctor_app import DoctorApp
 from gui.patient.patient_app import PatientApp
 from services.auth_service import authenticate_doctor, authenticate_patient
-from gui.registrationpat import AddPatientDialog
+# from gui.registrationpat import AddPatientDialog
 from gui.registrationdoc import AddDoctorDialog
 
 class LoginWindow(ctk.CTk):

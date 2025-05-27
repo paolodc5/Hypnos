@@ -7,7 +7,12 @@ class SleepRecord:
                  hr: int,
                  spo2: float,
                  movement_idx: float,
-                 sleep_cycles: str):
+                 sleep_cycles: str,
+                 duration: int = 0,
+                 deep_sleep_time: float = 0.0,
+                 light_sleep_time: float = 0.0,
+                 REM_time: float = 0.0,
+                 record_id: int = 0):
         self.date = date
         self.patient_id = patient_id
         self.device_id = device_id
@@ -15,11 +20,11 @@ class SleepRecord:
         self.spo2 = spo2
         self.movement_idx = movement_idx
         self.sleep_cycles = sleep_cycles
-        self.duration = 7 ###### PAY ATTENTION TO THIS
-        self.deep_sleep_time = 3 ##### PAY ATTENTION TO THIS
-        self.light_sleep_time = 2 ##### PAY ATTENTION TO THIS
-        self.REM_time = 1 ##### PAY ATTENTION TO THIS
-        self.record_id = 3 ####### PAY ATTENTION TO THIS
+        self.duration = duration 
+        self.deep_sleep_time = deep_sleep_time 
+        self.light_sleep_time = light_sleep_time 
+        self.REM_time = REM_time 
+        self.record_id = record_id 
         
 
  
@@ -34,6 +39,9 @@ class SleepRecord:
         total_sleep_time = ((self.REM_time or 0)+(self.deep_sleep_time or 0)+(self.light_sleep_time or 0))
         self.efficiency = round((total_sleep_time / self.duration*60) * 100, 2)
 
+        rem_ratio = self.REM_time / self.duration*60 if self.duration > 0 else 0
+        self.latency = 0
+        
         # Normalize total sleep: full score at 7h (420 min), min acceptable at 5h (300 min)
         sleep_score = max(0, min(1, (total_sleep_time - 300) / 120)) * 100
         rem_score = max(0, min(1, rem_ratio / 0.25)) * 100
