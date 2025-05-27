@@ -7,6 +7,18 @@ from db.connection import get_connection
 
 fake = Faker()
 
+def generate_phone():
+    # 8 to 15 digits, no spaces
+    return ''.join([str(random.randint(0, 9)) for _ in range(10)])
+
+def generate_email(name, surname, domain="hypnos.com"):
+    # Lowercase, no spaces, unique
+    return f"{name.lower()}.{surname.lower()}{random.randint(100,999)}@{domain}"
+
+def generate_fiscal_code():
+    # 8 alphanumeric characters
+    return ''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', k=8))
+
 def insert_fake_therapists(n=10):
     conn = get_connection()
     cur = conn.cursor()
@@ -14,55 +26,39 @@ def insert_fake_therapists(n=10):
         "Neurologist", "Psychiatrist", "Pulmonologist", "General Practitioner",
         "Sleep Medicine Specialist", "Endocrinologist", "Cardiologist", "Otolaryngologist"
     ]
-    therapists = []
     for i in range(n):
-        therapists.append((
-            i+1,
-            fake.first_name(),
-            fake.last_name(),
-            fake.unique.email(),
-            random.choice(specialties),
-            "12345"
-        ))
-    for t in therapists:
-        try:
-            cur.execute("""
-                INSERT INTO Therapist (DocID, Name, Surname, Email, Specialty, Password)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, t)
-        except sqlite3.IntegrityError:
-            pass
+        name = fake.first_name()
+        surname = fake.last_name()
+        email = generate_email(name, surname)
+        specialty = random.choice(specialties)
+        password = "12345"
+        cur.execute("""
+            INSERT INTO Therapist (Name, Surname, Specialty, Email, Password)
+            VALUES (?, ?, ?, ?, ?)
+        """, (name, surname, specialty, email, password))
     conn.commit()
     conn.close()
 
-def insert_fake_patients(n=10):
+def insert_fake_patients(n=20):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT DocID FROM Therapist")
-    therapist_ids = [row[0] for row in cur.fetchall()]
-    patients = []
+    doctor_ids = [row[0] for row in cur.fetchall()]
     for i in range(n):
-        doc_id = random.choice(therapist_ids)
-        patients.append((
-            i+1,
-            fake.first_name(),
-            fake.last_name(),
-            fake.date_of_birth(minimum_age=18, maximum_age=90),
-            fake.random_element(elements=["M", "F"]),
-            fake.unique.bothify(text="??????##"),
-            random.randint(18, 90),
-            fake.phone_number(),
-            doc_id,
-            "12345"  # Password
-        ))
-    for p in patients:
-        try:
-            cur.execute("""
-                INSERT INTO Patients (PatID, Name, Surname, DateOfBirth, Gender, FiscalCode, Age, PhoneNumber, DocID, Password)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, p)
-        except sqlite3.IntegrityError:
-            pass
+        name = fake.first_name()
+        surname = fake.last_name()
+        age = random.randint(18, 80)
+        birth_date = fake.date_of_birth(minimum_age=age, maximum_age=age).strftime("%Y-%m-%d")
+        gender = random.choice(["M", "F"])
+        phone = generate_phone()
+        fiscal_code = generate_fiscal_code()
+        email = generate_email(name, surname)
+        doctor_id = random.choice(doctor_ids) if doctor_ids else None
+        password = "12345"
+        cur.execute("""
+            INSERT INTO Patients (Name, Surname, Age, DateOfBirth, Gender, FiscalCode, PhoneNumber, DocID, Email, Password)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (name, surname, age, birth_date, gender, fiscal_code, phone, doctor_id, email, password))
     conn.commit()
     conn.close()
 
@@ -317,7 +313,7 @@ def insert_fake_appointment_slots_and_appointments(n=10):
 if __name__ == "__main__":
     print("Seeding database with fake data...")
     insert_fake_therapists(5)
-    insert_fake_patients(10)
+    insert_fake_patients(20)
     insert_fake_prescriptions(100)
     insert_fake_notes(100)
     insert_fake_wearable_devices()
