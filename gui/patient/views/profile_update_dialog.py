@@ -12,53 +12,53 @@ class ProfileUpdateDialog(ctk.CTkToplevel):
 
         ctk.CTkLabel(self, text="Update Profile", font=("Arial", 20, "bold")).pack(pady=(18, 10))
 
-        form = ctk.CTkFrame(self, fg_color="#f8fafc", corner_radius=12)
+        form = ctk.CTkFrame(self, fg_color="#ffffff", corner_radius=12)
         form.pack(fill="both", expand=True, padx=16, pady=8)
 
         # Name
-        ctk.CTkLabel(form, text="Name:", anchor="w").grid(row=0, column=0, sticky="w", padx=10, pady=(10, 2))
+        ctk.CTkLabel(form, text="Name:", anchor="w", text_color="#000000").grid(row=0, column=0, sticky="w", padx=10, pady=(10, 2))
         self.name_entry = ctk.CTkEntry(form)
         self.name_entry.insert(0, patient.name)
         self.name_entry.grid(row=0, column=1, padx=10, pady=(10, 2))
 
         # Surname
-        ctk.CTkLabel(form, text="Surname:", anchor="w").grid(row=1, column=0, sticky="w", padx=10, pady=2)
+        ctk.CTkLabel(form, text="Surname:", anchor="w", text_color="#000000").grid(row=1, column=0, sticky="w", padx=10, pady=2)
         self.surname_entry = ctk.CTkEntry(form)
         self.surname_entry.insert(0, patient.surname)
         self.surname_entry.grid(row=1, column=1, padx=10, pady=2)
 
         # Birthdate
-        ctk.CTkLabel(form, text="Birthdate (YYYY-MM-DD):", anchor="w").grid(row=2, column=0, sticky="w", padx=10, pady=2)
+        ctk.CTkLabel(form, text="Birthdate (YYYY-MM-DD):", anchor="w", text_color="#000000").grid(row=2, column=0, sticky="w", padx=10, pady=2)
         self.birth_entry = ctk.CTkEntry(form)
         self.birth_entry.insert(0, patient.birth_date)
         self.birth_entry.grid(row=2, column=1, padx=10, pady=2)
 
         # Age
-        ctk.CTkLabel(form, text="Age:", anchor="w").grid(row=3, column=0, sticky="w", padx=10, pady=2)
+        ctk.CTkLabel(form, text="Age:", anchor="w", text_color="#000000").grid(row=3, column=0, sticky="w", padx=10, pady=2)
         self.age_entry = ctk.CTkEntry(form)
         self.age_entry.insert(0, str(patient.age))
         self.age_entry.grid(row=3, column=1, padx=10, pady=2)
 
         # Gender
-        ctk.CTkLabel(form, text="Gender (M/F):", anchor="w").grid(row=4, column=0, sticky="w", padx=10, pady=2)
+        ctk.CTkLabel(form, text="Gender (M/F):", anchor="w", text_color="#000000").grid(row=4, column=0, sticky="w", padx=10, pady=2)
         self.gender_entry = ctk.CTkEntry(form)
         self.gender_entry.insert(0, patient.gender)
         self.gender_entry.grid(row=4, column=1, padx=10, pady=2)
 
         # Fiscal Code
-        ctk.CTkLabel(form, text="Fiscal Code:", anchor="w").grid(row=5, column=0, sticky="w", padx=10, pady=2)
+        ctk.CTkLabel(form, text="Fiscal Code:", anchor="w", text_color="#000000").grid(row=5, column=0, sticky="w", padx=10, pady=2)
         self.fiscal_entry = ctk.CTkEntry(form)
         self.fiscal_entry.insert(0, patient.fiscal_code)
         self.fiscal_entry.grid(row=5, column=1, padx=10, pady=2)
 
         # Email
-        ctk.CTkLabel(form, text="Email:", anchor="w").grid(row=6, column=0, sticky="w", padx=10, pady=2)
+        ctk.CTkLabel(form, text="Email:", anchor="w", text_color="#000000").grid(row=6, column=0, sticky="w", padx=10, pady=2)
         self.email_entry = ctk.CTkEntry(form)
         self.email_entry.insert(0, patient.email or "")
         self.email_entry.grid(row=6, column=1, padx=10, pady=2)
 
         # Phone
-        ctk.CTkLabel(form, text="Phone Number:", anchor="w").grid(row=7, column=0, sticky="w", padx=10, pady=2)
+        ctk.CTkLabel(form, text="Phone Number:", anchor="w", text_color="#000000").grid(row=7, column=0, sticky="w", padx=10, pady=2)
         self.phone_entry = ctk.CTkEntry(form)
         self.phone_entry.insert(0, patient.phone_number)
         self.phone_entry.grid(row=7, column=1, padx=10, pady=2)
