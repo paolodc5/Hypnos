@@ -2,13 +2,14 @@ import customtkinter as ctk
 from gui.doctor.clickable_row_frame import ClickableRowFrame
 
 class ScrollableListFrame(ctk.CTkFrame):
-    def __init__(self, master, items, fields_formatter, detail_formatter, column_titles, select_callback=None, **kwargs):
+    def __init__(self, master, items, fields_formatter, detail_formatter, column_titles, select_callback=None, detail_callback=None, **kwargs):
         super().__init__(master, fg_color="transparent", **kwargs)
         self.items = items
         self.fields_formatter = fields_formatter
         self.detail_formatter = detail_formatter
         self.column_titles = column_titles
         self.select_callback = select_callback
+        self.detail_callback = detail_callback
         self.selected_row = None
         self.selected_index = None
         self.row_widgets = []
@@ -65,8 +66,8 @@ class ScrollableListFrame(ctk.CTkFrame):
                     anchor="w"
                 )
                 value_label.grid(row=i+1, column=col, sticky="ew", padx=(24 if col == 0 else 12, 2), pady=8)
-                value_label.bind("<Button-1>", lambda e, idx=i: self.select_row(idx))
-                value_label.bind("<Double-Button-1>", lambda e, item=item: self.on_row_click(item))
+                value_label.bind("<Button-1>", lambda e, item=item: self.on_row_select(item))
+                value_label.bind("<Double-Button-1>", lambda e, item=item: self.on_row_detail(item))
                 row_labels.append(value_label)
                 self.inner_frame.grid_columnconfigure(col, weight=1)
             self.row_widgets.append(row_labels)
@@ -84,10 +85,13 @@ class ScrollableListFrame(ctk.CTkFrame):
         if self.select_callback:
             self.select_callback(self.selected_row)
 
-    def on_row_click(self, item):
+    def on_row_select(self, item):
         if self.select_callback:
-            details = self.detail_formatter(item)
-            self.show_detail_dialog(item, details)
+            self.select_callback(item)
+
+    def on_row_detail(self, item):
+        if self.detail_callback:
+            self.detail_callback(item)
 
     def show_detail_dialog(self, item, details):
         from gui.doctor.detail_dialog import DetailDialog

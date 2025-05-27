@@ -310,17 +310,192 @@ def insert_fake_appointment_slots_and_appointments(n=10):
     conn.commit()
     conn.close()
 
+def add_two_patients_to_rossi():
+    conn = get_connection()
+    cur = conn.cursor()
+    # Find Doctor Rossi's DocID
+    cur.execute("SELECT DocID FROM Therapist WHERE Surname = ?", ("Rossi",))
+    row = cur.fetchone()
+    if not row:
+        print("Doctor Rossi not found!")
+        conn.close()
+        return
+    rossi_id = row[0]
+
+    patients = [
+        ("Giulia", "Verdi", 30, "1994-05-12", "F", generate_fiscal_code(), generate_phone(), rossi_id, generate_email("Giulia", "Verdi")),
+        ("Marco", "Bianchi", 45, "1979-09-23", "M", generate_fiscal_code(), generate_phone(), rossi_id, generate_email("Marco", "Bianchi")),
+    ]
+    for name, surname, age, dob, gender, fiscal, phone, docid, email in patients:
+        cur.execute("""
+            INSERT INTO Patients (Name, Surname, Age, DateOfBirth, Gender, FiscalCode, PhoneNumber, DocID, Email, Password)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (name, surname, age, dob, gender, fiscal, phone, docid, email, "12345"))
+    conn.commit()
+    conn.close()
+
+def add_sleep_records_for_pippo_pluto():
+    conn = get_connection()
+    cur = conn.cursor()
+    # Find Pippo Pluto's PatID
+    cur.execute("SELECT PatID FROM Patients WHERE Name = ? AND Surname = ?", ("Pippo", "Pluto"))
+    row = cur.fetchone()
+    if not row:
+        print("Pippo Pluto not found!")
+        conn.close()
+        return
+    pippo_id = row[0]
+    # Find a device for Pippo Pluto
+    cur.execute("SELECT ID FROM WearableDevice WHERE PatID = ?", (pippo_id,))
+    dev_row = cur.fetchone()
+    if not dev_row:
+        print("No device found for Pippo Pluto!")
+        conn.close()
+        return
+    dev_id = dev_row[0]
+
+    today = datetime.now().date()
+    for i in range(7):
+        date = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+        duration = random.randint(360, 540)
+        deep_sleep = round(random.uniform(60, 120), 1)
+        light_sleep = round(random.uniform(120, 240), 1)
+        rem_sleep = round(random.uniform(60, 120), 1)
+        latency = max(2, random.gauss(15, 5))
+        cur.execute("""
+            INSERT OR IGNORE INTO SleepRecords (
+                Date, PatID, DevID, Hr, SpO2, MovementIdx, SleepCycles,
+                Duration, DeepSleepTime, LightSleepTime, REMTime, Latency
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            date,
+            pippo_id,
+            dev_id,
+            random.randint(50, 100),
+            round(random.uniform(90, 100), 1),
+            round(random.uniform(0, 10), 2),
+            str(random.randint(3, 6)),
+            duration,
+            deep_sleep,
+            light_sleep,
+            rem_sleep,
+            round(latency, 1)
+        ))
+    conn.commit()
+    conn.close()
+
+def add_questionnaires_for_pippo_pluto():
+    conn = get_connection()
+    cur = conn.cursor()
+    # Find Pippo Pluto's PatID
+    cur.execute("SELECT PatID FROM Patients WHERE Name = ? AND Surname = ?", ("Pippo", "Pluto"))
+    row = cur.fetchone()
+    if not row:
+        print("Pippo Pluto not found!")
+        conn.close()
+        return
+    pippo_id = row[0]
+    # Find a doctor for Pippo Pluto
+    cur.execute("SELECT DocID FROM Patients WHERE PatID = ?", (pippo_id,))
+    doc_row = cur.fetchone()
+    doc_id = doc_row[0] if doc_row else None
+
+    today = datetime.now().date()
+    questions = [
+        "Difficulty falling asleep",
+        "Difficulty staying asleep",
+        "Problem waking up early",
+        "Sleep dissatisfaction",
+        "Interference with daily functioning",
+        "Noticeable by others",
+        "Worry about current sleep"
+    ]
+    for i in range(7):
+        date = (today - timedelta(days=i)).strftime("%Y-%m-%d")
+        scores = []
+        for q in questions:
+            # Score: 0 (worst) to 4 (best)
+            score = random.randint(0, 4)
+            scores.append(score)
+            cur.execute("""
+                INSERT INTO QuestionnaireAnswers (PatID, Date, Question, Answer)
+                VALUES (?, ?, ?, ?)
+            """, (
+                pippo_id,
+                date,
+                q,
+                str(score)  # or score if your schema is INTEGER
+            ))
+        total_score = sum(scores)
+        cur.execute("""
+            INSERT OR IGNORE INTO Questionnaires (Date, Score, PatID, DocID)
+            VALUES (?, ?, ?, ?)
+        """, (
+            date,
+            total_score,
+            pippo_id,
+            doc_id
+        ))
+    conn.commit()
+    conn.close()
+
+def add_device_for_pippo_pluto():
+    conn = get_connection()
+    cur = conn.cursor()
+    # Find Pippo Pluto's PatID
+    cur.execute("SELECT PatID FROM Patients WHERE Name = ? AND Surname = ?", ("Pippo", "Pluto"))
+    row = cur.fetchone()
+    if not row:
+        print("Pippo Pluto not found!")
+        conn.close()
+        return
+    pippo_id = row[0]
+    # Insert a device for Pippo Pluto
+    cur.execute("""
+        INSERT INTO WearableDevice (Model, PatID)
+        VALUES (?, ?)
+    """, (
+        "FitSleep-X" + str(random.randint(100, 999)),
+        pippo_id
+    ))
+    conn.commit()
+    conn.close()
+
+def delete_today_questionnaire_for_pippo_pluto():
+    conn = get_connection()
+    cur = conn.cursor()
+    pippo_id = 21
+    today = datetime.now().date().strftime("%Y-%m-%d")
+    # Cancella risposte dal questionario
+    cur.execute("""
+        DELETE FROM QuestionnaireAnswers
+        WHERE PatID = ? AND Date = ?
+    """, (pippo_id, today))
+    # Cancella il questionario
+    cur.execute("""
+        DELETE FROM Questionnaires
+        WHERE PatID = ? AND Date = ?
+    """, (pippo_id, today))
+    conn.commit()
+    conn.close()
+
+
 if __name__ == "__main__":
     print("Seeding database with fake data...")
-    insert_fake_therapists(5)
-    insert_fake_patients(20)
-    insert_fake_prescriptions(100)
-    insert_fake_notes(100)
-    insert_fake_wearable_devices()
-    insert_fake_sleep_records(100)
-    insert_fake_questionnaires(40)
-    insert_fake_questionnaire_answers(50)
-    insert_fake_appointment_slots_and_appointments(30)
+    # insert_fake_therapists(5)
+    # insert_fake_patients(20)
+    # insert_fake_prescriptions(100)
+    # insert_fake_notes(100)
+    # insert_fake_wearable_devices()
+    # insert_fake_sleep_records(100)
+    # insert_fake_questionnaires(40)
+    # insert_fake_questionnaire_answers(50)
+    # insert_fake_appointment_slots_and_appointments(30)
+    # add_device_for_pippo_pluto()
+    # add_two_patients_to_rossi()
+    # add_sleep_records_for_pippo_pluto()
+    # add_questionnaires_for_pippo_pluto()
+    delete_today_questionnaire_for_pippo_pluto()
     print("Done!")
 
 

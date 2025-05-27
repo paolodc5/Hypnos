@@ -114,6 +114,6 @@ class QuestionnairesView(BaseView):
     def open_add_isi_dialog(self):
         AddISIDialog(self.app, self.app.patient, on_success=self.show)
 
-    def load_questionnaires_for_day(self, selected_day):
-        # For now, just reload with selected day (simulate)
-        self.app.load_questionnaires()
+    # def load_questionnaires_for_day(self, selected_day):
+    #     # For now, just reload with selected day (simulate)
+    #     self.app.load_questionnaires()

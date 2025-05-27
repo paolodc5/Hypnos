@@ -68,6 +68,10 @@ class AdministrationFrame(ctk.CTkFrame):
         items = section_conf["items"]()
 
         def on_select(item):
+            self.selected_item = item
+            self.update_action_buttons(section)
+
+        def on_detail(item):
             from gui.doctor.detail_dialog import DetailDialog
             details = section_conf["detail_formatter"](item)
             title = f"Sleep Record {item.date}" if section == "Sleep" else "Details"
@@ -79,7 +83,8 @@ class AdministrationFrame(ctk.CTkFrame):
             fields_formatter=section_conf["fields_formatter"],
             detail_formatter=section_conf["detail_formatter"],
             column_titles=section_conf["column_titles"],
-            select_callback=on_select
+            select_callback=on_select,
+            detail_callback=on_detail
         ).pack(fill="both", expand=True, padx=10, pady=10)
 
         # --- Show means in the right frame for Sleep section ---

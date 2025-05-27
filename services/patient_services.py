@@ -303,14 +303,12 @@ def get_questionnaires_patient(patient_id):
         cursor.execute("""
             SELECT Question, Answer FROM QuestionnaireAnswers
             WHERE PatID = ? AND Date = ?
-            ORDER BY AnswerID ASC
         """, (patient_id, date))
         answers = cursor.fetchall()
-        # Ensure answers are in the same order as ISI_QUESTIONS
+        answer_map = {q: int(a) for q, a in answers if a is not None and str(a).isdigit()}
         responses = []
         for q in ISI_QUESTIONS:
-            found = next((int(a[1]) for a in answers if a[0] == q), None)
-            responses.append((q, found if found is not None else 0))
+            responses.append((q, answer_map.get(q, 0)))
         result[date] = {
             "total_score": score,
             "severity": isi_severity(score),
