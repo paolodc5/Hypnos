@@ -1,37 +1,40 @@
 from .base_view import BaseView
 import customtkinter as ctk
 
+def format_minutes(minutes):
+    hours = int(minutes) // 60
+    mins = int(minutes) % 60
+    return f"{hours}h {mins:02d}m"
+
 class SleepRecordsView(BaseView):
     def show(self, selected_day=None):
         self.app.clear_content()
 
-        # Example sleep records (replace with your real data source)
-        sleep_records = {
-            "2024-05-15": {
-                "total_sleep": "7h 30m",
-                "time_in_bed": "8h 15m",
-                "efficiency": "91%",
-                "hr_during_sleep": "65 bpm",
-                "Sleep_Score": 82,
-                "latency": "15 min",
-                "rem_phase": "1h 20m",
-                "deep_phase": "1h 45m",
-                "light_phase": "4h 25m",
-            },
-            "2024-05-16": {
-                "total_sleep": "6h 50m",
-                "time_in_bed": "7h 40m",
-                "efficiency": "89%",
-                "hr_during_sleep": "67 bpm",
-                "Sleep_Score": 75,
-                "latency": "18 min",
-                "rem_phase": "1h 10m",
-                "deep_phase": "1h 30m",
-                "light_phase": "4h 10m",
-            }
-        }
+        # Load real sleep records from the patient object
+        self.app.patient.load_sleep_records()
+        sleep_records_list = self.app.patient.sleep_records
 
-        days = list(sleep_records.keys())
+        if not sleep_records_list:
+            ctk.CTkLabel(self.app.content_frame, text="No sleep records available.", font=("Helvetica", 18), text_color="red").pack(pady=40)
+            return
+
+        # Convert to dict for UI compatibility and formatting
+        sleep_records = {}
+        for rec in sleep_records_list:
+            rec.compute_sleep_score()
+            sleep_records[rec.date] = {
+                "total_sleep": format_minutes(rec.duration),
+                "time_in_bed": format_minutes(rec.duration),  # If you have a separate field, use it
+                "efficiency": f"{getattr(rec, 'efficiency', 0):.0f}%",
+                "hr_during_sleep": f"{rec.hr} bpm",
+                "Sleep_Score": getattr(rec, "quality_score", 0),
+                "latency": f"{getattr(rec, 'latency', 0)} min",
+                "rem_phase": format_minutes(rec.REM_time),
+                "deep_phase": format_minutes(rec.deep_sleep_time),
+                "light_phase": format_minutes(rec.light_sleep_time),
+            }
+
+        days = list(sorted(sleep_records.keys(), reverse=True))
         if not days:
             ctk.CTkLabel(self.app.content_frame, text="No sleep records available.", font=("Helvetica", 18), text_color="red").pack(pady=40)
             return
@@ -104,9 +107,8 @@ class SleepRecordsView(BaseView):
         score_container = ctk.CTkFrame(widget_score, fg_color="transparent")
         score_container.pack(fill="x", padx=20, pady=20)
 
-        ctk.CTkLabel(score_container, text="Sleep Score", font=("Helvetica", 22, "bold"), text_color="#63B3ED").pack(side="left", anchor="w")
-
         score = record.get("Sleep_Score", 0)
+        ctk.CTkLabel(score_container, text="Sleep Score", font=("Helvetica", 22, "bold"), text_color="#63B3ED").pack(side="left", anchor="w")
         ctk.CTkLabel(score_container, text=str(score), font=("Helvetica", 22, "bold"), text_color="#F0EDEE").pack(side="right", anchor="e")
 
         progress_container = ctk.CTkFrame(widget_score, fg_color="transparent")

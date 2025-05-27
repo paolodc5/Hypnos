@@ -12,8 +12,8 @@ class AdministrationFrame(ctk.CTkFrame):
         self.selected_item = None
         self.configure(fg_color="#eaf0fb", corner_radius=12)
         self.grid_rowconfigure(1, weight=1)
-        self.grid_columnconfigure(0, weight=2)  # 2/3 for scrollable
-        self.grid_columnconfigure(1, weight=1)  # 1/3 for actions
+        self.grid_columnconfigure(0, weight=2)
+        self.grid_columnconfigure(1, weight=1)
 
         self.seg_button = ctk.CTkSegmentedButton(
             self, 
@@ -32,14 +32,11 @@ class AdministrationFrame(ctk.CTkFrame):
         )
         self.seg_button.grid(row=0, column=0, columnspan=2, pady=(18, 10), padx=0, sticky="n")
 
-        # Left: Scrollable list (2/3)
         self.content_frame = ctk.CTkFrame(self, fg_color="#f8fafc", corner_radius=10)
         self.content_frame.grid(row=1, column=0, sticky="nsew", padx=(10, 5), pady=5)
 
-        # Right: Actions (1/3)
         self.action_frame = ctk.CTkFrame(self, fg_color="#e0e7ef", corner_radius=10)
         self.action_frame.grid(row=1, column=1, sticky="nsew", padx=(5, 10), pady=10)
-        self.action_frame.grid_rowconfigure((0,1,2,3), weight=1)
         self.action_frame.grid_columnconfigure(0, weight=1)
 
         self.current_section = None
@@ -70,7 +67,6 @@ class AdministrationFrame(ctk.CTkFrame):
         section_conf["loader"]()
         items = section_conf["items"]()
 
-        # --- Make sleep records clickable ---
         def on_select(item):
             from gui.doctor.detail_dialog import DetailDialog
             details = section_conf["detail_formatter"](item)
@@ -88,7 +84,6 @@ class AdministrationFrame(ctk.CTkFrame):
 
         # --- Show means in the right frame for Sleep section ---
         if section == "Sleep" and items:
-            import datetime
             now = datetime.datetime.now()
             three_weeks_ago = now - datetime.timedelta(days=21)
             recent = [
@@ -109,7 +104,6 @@ class AdministrationFrame(ctk.CTkFrame):
                         scores.append(r.quality_score)
                 mean_score = sum(scores) / len(scores) if scores else 0
 
-                from gui.doctor.section_config import format_minutes
                 ctk.CTkLabel(self.action_frame, text="Averages (Last 3 Weeks)", font=("Arial", 16, "bold"), text_color="#1e3a8a").pack(pady=(10, 8))
                 for label, value in [
                     ("Duration", format_minutes(mean_duration)),
@@ -122,8 +116,8 @@ class AdministrationFrame(ctk.CTkFrame):
                     ctk.CTkLabel(self.action_frame, text=f"{label}: {value}", font=("Arial", 14), text_color="#1e293b").pack(anchor="w", padx=18, pady=2)
             else:
                 ctk.CTkLabel(self.action_frame, text="No sleep data in last 3 weeks.", font=("Arial", 13, "italic"), text_color="gray").pack(pady=20)
-
-        self.update_action_buttons(section)
+        else:
+            self.update_action_buttons(section)
 
     def update_action_buttons(self, section):
         for widget in self.action_frame.winfo_children():
@@ -137,7 +131,6 @@ class AdministrationFrame(ctk.CTkFrame):
         }
 
         if section == "Notes":
-            # Add Note (Primary)
             ctk.CTkButton(
                 self.action_frame,
                 text="📝 Add Note",
@@ -146,8 +139,6 @@ class AdministrationFrame(ctk.CTkFrame):
                 command=self.open_add_note_dialog,
                 **button_config
             ).grid(row=0, column=0, padx=20, pady=(10, 6), sticky="ew")
-
-            # Edit Note (Neutral Gray)
             ctk.CTkButton(
                 self.action_frame,
                 text="✏️ Edit Note",
@@ -157,8 +148,6 @@ class AdministrationFrame(ctk.CTkFrame):
                 command=self.open_edit_note_dialog,
                 **button_config
             ).grid(row=1, column=0, padx=20, pady=6, sticky="ew")
-
-            # Delete Note (Soft Red)
             ctk.CTkButton(
                 self.action_frame,
                 text="🗑️ Delete Note",
@@ -178,7 +167,6 @@ class AdministrationFrame(ctk.CTkFrame):
                 command=self.open_add_prescription_dialog,
                 **button_config
             ).grid(row=0, column=0, padx=20, pady=(10, 6), sticky="ew")
-
             ctk.CTkButton(
                 self.action_frame,
                 text="✏️ Edit Prescription",
@@ -188,7 +176,6 @@ class AdministrationFrame(ctk.CTkFrame):
                 command=self.open_edit_prescription_dialog,
                 **button_config
             ).grid(row=1, column=0, padx=20, pady=6, sticky="ew")
-
             ctk.CTkButton(
                 self.action_frame,
                 text="🗑️ Delete Prescription",

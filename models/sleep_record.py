@@ -1,4 +1,3 @@
-
 class SleepRecord:
     def __init__(self, 
                  date: str,
@@ -12,7 +11,8 @@ class SleepRecord:
                  deep_sleep_time: float = 0.0,
                  light_sleep_time: float = 0.0,
                  REM_time: float = 0.0,
-                 record_id: int = 0):
+                 record_id: int = 0,
+                 latency: float = 0.0):
         self.date = date
         self.patient_id = patient_id
         self.device_id = device_id
@@ -25,31 +25,31 @@ class SleepRecord:
         self.light_sleep_time = light_sleep_time 
         self.REM_time = REM_time 
         self.record_id = record_id 
+        self.latency = latency
         
-
- 
 
     def compute_sleep_score(self):
         if self.duration == 0:
             self.efficiency = 0
             self.quality = "Invalid"
             self.latency = 0
+            self.quality_score = 0
             return
-        
-        total_sleep_time = ((self.REM_time or 0)+(self.deep_sleep_time or 0)+(self.light_sleep_time or 0))
-        self.efficiency = round((total_sleep_time / self.duration*60) * 100, 2)
 
-        rem_ratio = self.REM_time / self.duration*60 if self.duration > 0 else 0
-        self.latency = 0
-        
+        total_sleep_time = (self.REM_time or 0) + (self.deep_sleep_time or 0) + (self.light_sleep_time or 0)
+        self.efficiency = round((total_sleep_time / self.duration) * 100, 2)
+
+        rem_ratio = self.REM_time / self.duration if self.duration > 0 else 0
+        self.latency = getattr(self, "latency", 0)  # If latency is not set, default to 0
+
         # Normalize total sleep: full score at 7h (420 min), min acceptable at 5h (300 min)
         sleep_score = max(0, min(1, (total_sleep_time - 300) / 120)) * 100
         rem_score = max(0, min(1, rem_ratio / 0.25)) * 100
 
-        deep_ratio = self.deep_sleep_time / self.duration*60
-        rem_ratio = self.REM_time / self.duration*60
+        deep_ratio = self.deep_sleep_time / self.duration if self.duration > 0 else 0
         deep_score = max(0, min(1, deep_ratio / 0.2)) * 100
 
+        # Latency scoring (all in minutes)
         if 10 <= self.latency <= 20:
             latency_score = 100
         elif self.latency < 10:
@@ -77,4 +77,3 @@ class SleepRecord:
 
     def __str__(self):
         return f"SleepRecord({self.record_id}, Patient ID: {self.patient_id}, Date: {self.date}, Duration: {self.duration} hours, Efficiency: {self.efficiency}%, Quality: {self.quality})"
-    
