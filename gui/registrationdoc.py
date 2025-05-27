@@ -26,7 +26,7 @@ class AddDoctorDialog(ctk.CTkToplevel):
 
         # Create input fields dynamically
         for i, (label_text, required) in enumerate(fields):
-            ctk.CTkLabel(form, text=f"{label_text}:", anchor="w").grid(row=i, column=0, sticky="w", padx=10, pady=8)
+            ctk.CTkLabel(form, text=f"{label_text}:", anchor="w", text_color='white').grid(row=i, column=0, sticky="w", padx=10, pady=8)
 
             placeholder = "Required" if required else "Optional"
 
