@@ -69,7 +69,9 @@ class AdministrationFrame(ctk.CTkFrame):
 
         def on_select(item):
             self.selected_item = item
-            self.update_action_buttons(section)
+            if section in ("Notes", "Prescriptions"):
+                self.update_action_buttons(section)
+            # Sezione Sleep: non fare nulla, così il pannello delle medie resta visibile
 
         def on_detail(item):
             from gui.doctor.detail_dialog import DetailDialog
