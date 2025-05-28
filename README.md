@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="gui/images/logo_hypnos.png" alt="Hypnos Logo" width="200"/>
+  <img src="gui/images/hypnos_cut.png" alt="Hypnos Logo" width="200"/>
 </p>
 
 # Hypnos
