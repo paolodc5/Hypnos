@@ -16,7 +16,7 @@ git clone https://github.com/your-username/hypnos.git
 cd hypnos
 ```
 
-### 2. Create and activate a virtual environment
+### 2. (Optional) Create and activate a virtual environment
 
 Open a terminal, navigate to the project folder, and run:
 
