@@ -39,11 +39,11 @@ python main.py
 
 ## Test users credentials
 All the passwords are "12345", you can see all the therapist already registered in the database file.
-Exemplar patient: \n
-Name: *Katrina*\n
-Surname: *Sala*\n
-Exemplar doctor:\n
-Name: *Brooke*\n
+Exemplar patient: \\
+Name: *Katrina*\\
+Surname: *Sala*\\
+Exemplar doctor:\\
+Name: *Brooke*\\
 Surname: *Lane*
 
 
