@@ -41,7 +41,16 @@ python main.py
 All the passwords are "12345", you can see all the therapist already registered in the database file
 
 
-
+## Project structure
+```bash
+hypnos/
+├── main.py                 # Application entry point
+├── requirements.txt        # Required Python packages
+├── db/                     # Database handling module
+├── gui/                    # Graphical User Interface (customTkinter)
+├── models/                 # Domain classes (patients, doctors, prescriptions, etc.)
+└── services/               # Application logic layer
+```
 
 
 
