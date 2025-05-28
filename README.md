@@ -42,7 +42,7 @@ All the passwords are "12345", you can see all the therapist already registered 
 Exemplar patient:  
 Name: *Katrina*  
 Surname: *Sala*      
-Exemplar doctor:
+Exemplar doctor:  
 Name: *Brooke*  
 Surname: *Lane*
 
