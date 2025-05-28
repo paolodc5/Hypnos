@@ -23,6 +23,30 @@ venv\Scripts\activate
 
 # On macOS/Linux
 source venv/bin/activate
+```
+### 2. Install requirements
+Once the virtual environment is activated, install the required packages:
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Run the application
+After installing the dependencies, start the app with:
+```bash
+# Run from the project's root directory
+python main.py
+```
+
+## Test users credentials
+All the passwords are "12345", you can see all the therapist already registered in the database file
+
+
+
+
+
+
+
+
 
 
 
