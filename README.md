@@ -9,7 +9,14 @@ It is the final project for the **Medical Informatics** course 2024–25 @ Polit
 
 Follow these steps to run the app correctly:
 
-### 1. Create and activate a virtual environment
+### 1. Clone the repo
+To get started with Hypnos locally, you need to clone the repository from GitHub:
+```bash
+git clone https://github.com/your-username/hypnos.git
+cd hypnos
+```
+
+### 2. Create and activate a virtual environment
 
 Open a terminal, navigate to the project folder, and run:
 
@@ -24,13 +31,13 @@ venv\Scripts\activate
 # On macOS/Linux
 source venv/bin/activate
 ```
-### 2. Install requirements
+### 3. Install requirements
 Once the virtual environment is activated, install the required packages:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Run the application
+### 4. Run the application
 After installing the dependencies, start the app with:
 ```bash
 # Run from the project's root directory
