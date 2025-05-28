@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="gui/images/logo_hypnos.png" alt="Hypnos Logo" width="200"/>
+</p>
+
 # Hypnos
 
 **Hypnos** is our application for sleep monitoring and remote patient management.  
