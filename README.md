@@ -3,6 +3,9 @@
 **Hypnos** is our application for sleep monitoring and remote patient management.  
 It is the final project for the **Medical Informatics** course 2024–25 @ Politecnico di Milano.
 
+This is the link to the github repo: 
+https://github.com/paolodc5/Hypnos
+
 ---
 
 ## How to Run Hypnos
