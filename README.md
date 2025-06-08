@@ -48,7 +48,7 @@ python main.py
 All the passwords are "12345", you can see all the therapist already registered in the database file.  
 **Example Patient:**  
 - Name: *Katrina*  
-- Surname: *Sala*
+- Surname: *Salas*
 
 **Example Doctor:**  
 - Name: *Brooke*  
